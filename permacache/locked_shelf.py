@@ -4,11 +4,12 @@ from filelock import FileLock
 import shelve
 import time
 
+
 class Lock:
     def __init__(self, lock_path, time_path):
         self.lock = FileLock(lock_path)
         self.time_path = time_path
-        self.last_opened = float('-inf')
+        self.last_opened = float("-inf")
         self.unlocked = False
 
     def _get_last_modified(self):
@@ -54,6 +55,7 @@ class LockedShelf:
 
     The cache is mantained over opening and closing of the shelf.
     """
+
     def __init__(self, path):
         try:
             os.makedirs(path)

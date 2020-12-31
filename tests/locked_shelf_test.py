@@ -1,4 +1,3 @@
-
 import os
 import shutil
 import random
@@ -6,6 +5,7 @@ import random
 import unittest
 
 from permacache.locked_shelf import LockedShelf
+
 
 class LockedShelfTest(unittest.TestCase):
     def setUp(self):
