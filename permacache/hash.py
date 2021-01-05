@@ -12,7 +12,9 @@ class TensorEncoder(json.JSONEncoder):
         if type(obj).__module__ == "numpy":
             obj = str(obj.tostring())
         if hasattr(obj, "__attrs_attrs__"):
+            typename = type(obj).__name__
             obj = {a.name: getattr(obj, a.name) for a in obj.__attrs_attrs__}
+            obj[".attr.__name__"] = typename
         if obj is original:
             return super().default(obj)
         return obj
