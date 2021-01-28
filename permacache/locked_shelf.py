@@ -102,7 +102,4 @@ class LockedShelf:
         return self
 
     def __exit__(self, *args, **kwargs):
-        if self.shelf is not None:
-            self.shelf.close()
-        self.shelf = None
         self.lock.__exit__(*args, **kwargs)
