@@ -15,6 +15,11 @@ class LockedShelfTest(unittest.TestCase):
         self.shelf.close()
         shutil.rmtree("temp")
 
+    def get_then_set(self):
+        with self.shelf as s:
+            self.assertFalse("anything" in s)
+            s["hi"] = 3
+
     def test_put_and_access(self):
         with self.shelf as s:
             s["a"] = "b"

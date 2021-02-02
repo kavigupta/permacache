@@ -15,7 +15,7 @@ class Lock:
     def _get_last_modified(self):
         self._check()
         if not os.path.exists(self.time_path):
-            self.set_last_opened()
+            self.set_last_modified()
         with open(self.time_path) as f:
             return float(f.read())
 
