@@ -12,6 +12,7 @@ class LockedShelfTest(unittest.TestCase):
         self.shelf = LockedShelf("temp/tempshelf")
 
     def tearDown(self):
+        self.shelf.close()
         shutil.rmtree("temp")
 
     def test_put_and_access(self):

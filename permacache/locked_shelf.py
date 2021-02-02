@@ -103,3 +103,6 @@ class LockedShelf:
 
     def __exit__(self, *args, **kwargs):
         self.lock.__exit__(*args, **kwargs)
+
+    def close(self):
+        self.shelf.close()
