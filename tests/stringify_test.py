@@ -10,7 +10,7 @@ class StringifyTest(unittest.TestCase):
         self.assertEqual("[2, 3]", stringify([2, 3]))
         self.assertEqual('{"a": 3}', stringify({"a": 3}))
 
-    def test_stringify_numpy(self):
+    def test_stringify_attrs(self):
         import attr
 
         @attr.s
