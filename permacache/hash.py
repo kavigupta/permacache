@@ -32,7 +32,10 @@ def best_effort_to_bytes(obj):
             obj = obj.cpu()
         obj = obj.detach().numpy()
     if type(obj).__module__ == "numpy":
-        obj = obj.tostring()
+        if type(obj).__name__ == "dtype":
+            obj = str(obj).encode("utf-8")
+        else:
+            obj = obj.tostring()
     return obj
 
 
