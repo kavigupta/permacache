@@ -3,6 +3,8 @@ import hashlib
 
 
 class TensorEncoder(json.JSONEncoder):
+    fast_bytes = False
+
     def default(self, obj):
         original = obj
         if hasattr(obj, "__attrs_attrs__"):
@@ -11,10 +13,17 @@ class TensorEncoder(json.JSONEncoder):
             obj[".attr.__name__"] = typename
         obj = best_effort_to_bytes(obj)
         if isinstance(obj, bytes):
-            obj = str(obj)
+            if self.fast_bytes:
+                obj = hashlib.sha256(obj).hexdigest()
+            else:
+                obj = str(obj)
         if obj is original:
             return super().default(obj)
         return obj
+
+
+class FastTensorEncoder(TensorEncoder):
+    fast_bytes = True
 
 
 def best_effort_to_bytes(obj):
@@ -27,9 +36,11 @@ def best_effort_to_bytes(obj):
     return obj
 
 
-def stringify(obj):
-    return json.dumps(obj, cls=TensorEncoder, sort_keys=True)
+def stringify(obj, *, fast_bytes=False):
+    return json.dumps(
+        obj, cls=FastTensorEncoder if fast_bytes else TensorEncoder, sort_keys=True
+    )
 
 
-def stable_hash(obj):
-    return hashlib.sha256(stringify(obj).encode("utf-8")).hexdigest()
+def stable_hash(obj, **kwargs):
+    return hashlib.sha256(stringify(obj, **kwargs).encode("utf-8")).hexdigest()
