@@ -1,5 +1,6 @@
 import json
 import hashlib
+from types import SimpleNamespace
 
 
 class TensorEncoder(json.JSONEncoder):
@@ -11,6 +12,9 @@ class TensorEncoder(json.JSONEncoder):
             typename = type(obj).__name__
             obj = {a.name: getattr(obj, a.name) for a in obj.__attrs_attrs__}
             obj[".attr.__name__"] = typename
+        if isinstance(obj, SimpleNamespace):
+            obj = obj.__dict__
+            obj[".builtin.__name__"] = "types.SimpleNamespace"
         obj = best_effort_to_bytes(obj)
         if isinstance(obj, bytes):
             if self.fast_bytes:
