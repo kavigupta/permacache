@@ -45,5 +45,7 @@ def stringify(obj, *, fast_bytes=False):
     )
 
 
-def stable_hash(obj, **kwargs):
-    return hashlib.sha256(stringify(obj, **kwargs).encode("utf-8")).hexdigest()
+def stable_hash(obj, *, fast_bytes=True):
+    return hashlib.sha256(
+        stringify(obj, fast_bytes=fast_bytes).encode("utf-8")
+    ).hexdigest()
