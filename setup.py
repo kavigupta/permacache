@@ -21,4 +21,5 @@ setuptools.setup(
     ],
     python_requires=">=3.6",
     install_requires=["attrs==20.3.0", "filelock==3.0.12"],
+    entry_points={"console_scripts": ["permacache=permacache.main:main"],},
 )
