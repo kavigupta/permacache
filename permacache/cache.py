@@ -27,7 +27,7 @@ class CachedFunction:
         return value
 
 
-def permacache(path, key_function=lambda *args, **kwargs: [args, kwargs]):
+def permacache(path, key_function=dict()):
     path = os.path.join(CACHE, path)
 
     def annotator(f):
