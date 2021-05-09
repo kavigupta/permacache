@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="permacache",
-    version="2.0.1",
+    version="2.0.2",
     author="Kavi Gupta",
     author_email="permacache@kavigupta.org",
     description="Permanant cache.",
@@ -20,7 +20,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.6",
-    install_requires=["attrs==20.3.0", "filelock==3.0.12", "appdirs==1.4.4"],
+    install_requires=["attrs>=20.3.0", "filelock>=3.0.12", "appdirs>=1.4.4"],
     entry_points={
         "console_scripts": ["permacache=permacache.main:main"],
     },
