@@ -43,3 +43,15 @@ def f(x, y=2, z=3):
 ```
 
 The calls `f(2)`, `f(2, 2, 3)`, `f(2, z=3, y=2)`, and `f(x=2, y=2, z=3)` are all cached using the same key.
+
+If you want to add an extra argument, you can keep backwards compatibility using the following code.
+
+```
+from permacache import drop_if_equal
+
+@permacache("path/f", key_function=dict(t=drop_if_equal(0)))
+def f(x, y=2, z=3, t=0):
+    pass
+```
+
+In the above code, `t` is dropped from consideration if `t == 0`, allowing us to reuse our old calls.
