@@ -3,6 +3,7 @@
 *.ipynb
 env
 *.swp
+.idea
 *.egg-info
 dist
 build
