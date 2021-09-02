@@ -23,7 +23,7 @@ class TensorEncoder(json.JSONEncoder):
                 obj = str(obj)
         if isinstance(obj, range):
             obj = {".type": "range", "representation": str(obj)}
-        if any(x.__name__ == "Module" for x in type(obj).mro()):
+        if self.isinstance_str(obj, "Module"):
             obj = {
                 ".type": "Module",
                 "hash": dict(
@@ -36,6 +36,12 @@ class TensorEncoder(json.JSONEncoder):
         if obj is original:
             return super().default(obj)
         return obj
+
+    def isinstance_str(self, obj, str_type):
+        try:
+            return any(x.__name__ == str_type for x in type(obj).mro())
+        except TypeError:
+            return False
 
 
 class FastTensorEncoder(TensorEncoder):
