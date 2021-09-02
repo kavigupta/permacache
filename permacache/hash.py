@@ -21,6 +21,18 @@ class TensorEncoder(json.JSONEncoder):
                 obj = hashlib.sha256(obj).hexdigest()
             else:
                 obj = str(obj)
+        if isinstance(obj, range):
+            obj = {".type": "range", "representation": str(obj)}
+        if any(x.__name__ == "Module" for x in type(obj).mro()):
+            obj = {
+                ".type": "Module",
+                "hash": dict(
+                    other_dict={
+                        k: v for k, v in obj.__dict__.items() if not k.startswith("_")
+                    },
+                    state_dict=obj.state_dict(),
+                ),
+            }
         if obj is original:
             return super().default(obj)
         return obj
