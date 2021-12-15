@@ -1,6 +1,7 @@
 import json
 import hashlib
 from types import SimpleNamespace
+import numbers
 
 
 class TensorEncoder(json.JSONEncoder):
@@ -33,6 +34,7 @@ class TensorEncoder(json.JSONEncoder):
                     state_dict=obj.state_dict(),
                 ),
             }
+        obj = fix_dictionary(obj)
         if obj is original:
             return super().default(obj)
         return obj
@@ -42,6 +44,23 @@ class TensorEncoder(json.JSONEncoder):
             return any(x.__name__ == str_type for x in type(obj).mro())
         except TypeError:
             return False
+
+
+def fix_dictionary(obj):
+    """
+    Fix dictionaries with non-json keys.
+    """
+    if isinstance(obj, (list, tuple)):
+        return [fix_dictionary(x) for x in obj]
+    if not isinstance(obj, dict):
+        return obj
+    if any(not isinstance(k, (str, numbers.Number)) for k in obj.keys()):
+        obj = {
+            ".fixed_dictionary_nonjson_keys": True,
+            "contents": {stringify(k, fast_bytes=True): v for k, v in obj.items()},
+        }
+    obj = {k: fix_dictionary(v) for k, v in obj.items()}
+    return obj
 
 
 class FastTensorEncoder(TensorEncoder):
@@ -63,7 +82,9 @@ def best_effort_to_bytes(obj):
 
 def stringify(obj, *, fast_bytes=False):
     return json.dumps(
-        obj, cls=FastTensorEncoder if fast_bytes else TensorEncoder, sort_keys=True
+        fix_dictionary(obj),
+        cls=FastTensorEncoder if fast_bytes else TensorEncoder,
+        sort_keys=True,
     )
 
 
