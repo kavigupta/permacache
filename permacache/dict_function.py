@@ -17,7 +17,7 @@ def drop_if_equal(value, mapper=lambda x: x):
 def dict_function(d, fn):
     signature = inspect.signature(fn)
 
-    def key(*args, **kwargs):
+    def key(args, kwargs):
         arguments = signature.bind(*args, **kwargs)
         arguments.apply_defaults()
         result = {}

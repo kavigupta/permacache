@@ -18,7 +18,7 @@ class CachedFunction:
         self.shelf = LockedShelf(path)
 
     def __call__(self, *args, **kwargs):
-        key = stringify(self.key_function(*args, **kwargs))
+        key = stringify(self.key_function(args, kwargs))
         with self.shelf as db:
             if key in db:
                 return db[key]
