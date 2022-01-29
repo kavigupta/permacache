@@ -30,14 +30,17 @@ class StringifyTest(unittest.TestCase):
 
     def test_stringify_numpy(self):
         self.assertEqual(
-            self.slow_hash, stable_hash(self.data, fast_bytes=False),
+            self.slow_hash,
+            stable_hash(self.data, fast_bytes=False),
         )
         self.assertEqual(self.fast_hash, stable_hash(self.data))
 
     def test_stringify_torch(self):
         self.assertEqual(
-            self.slow_hash, stable_hash(torch.tensor(self.data), fast_bytes=False),
+            self.slow_hash,
+            stable_hash(torch.tensor(self.data), fast_bytes=False),
         )
         self.assertEqual(
-            self.fast_hash, stable_hash(torch.tensor(self.data)),
+            self.fast_hash,
+            stable_hash(torch.tensor(self.data)),
         )
