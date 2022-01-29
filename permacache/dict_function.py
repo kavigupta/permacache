@@ -1,5 +1,6 @@
-import inspect
+import attr
 
+from .utils import parallelize_arguments, bind_arguments
 
 DEFAULT_FUNCTIONS = {None: lambda x: None}
 
@@ -10,18 +11,26 @@ class drop_if:
         self.mapper = mapper
 
 
+@attr.s
+class parallel_output:
+    values = attr.ib()
+
+
 def drop_if_equal(value, mapper=lambda x: x):
     return drop_if(lambda x: x == value, mapper)
 
 
 def dict_function(d, fn):
-    signature = inspect.signature(fn)
+    def key(args, kwargs, *, parallel=()):
+        arguments = bind_arguments(fn, args, kwargs)
+        if not parallel:
+            return bind(arguments)
+        all_args = parallelize_arguments(arguments, parallel)
+        return parallel_output([bind(v) for v in all_args])
 
-    def key(args, kwargs):
-        arguments = signature.bind(*args, **kwargs)
-        arguments.apply_defaults()
+    def bind(arguments):
         result = {}
-        for k, v in arguments.arguments.items():
+        for k, v in arguments.items():
             if k in d:
                 if isinstance(d[k], drop_if):
                     if d[k].predicate(v):
