@@ -16,6 +16,11 @@ class TensorEncoder(json.JSONEncoder):
         if isinstance(obj, SimpleNamespace):
             obj = obj.__dict__
             obj[".builtin.__name__"] = "types.SimpleNamespace"
+        if (
+            type(obj).__module__ == "torch.nn.parameter"
+            and type(obj).__name__ == "Parameter"
+        ):
+            obj = obj.data
         obj = best_effort_to_bytes(obj)
         if isinstance(obj, bytes):
             if self.fast_bytes:
