@@ -39,6 +39,18 @@ class TensorEncoder(json.JSONEncoder):
                     state_dict=obj.state_dict(),
                 ),
             }
+        if self.isinstance_str(obj, "DataFrame"):
+            return {
+                ".type": "pandas.DataFrame",
+                "columns": list(obj),
+                "values": {k: obj[k] for k in obj},
+            }
+        if self.isinstance_str(obj, "Series"):
+            return {
+                ".type": "pandas.Series",
+                "index": list(obj.index),
+                "values": list(obj),
+            }
         obj = fix_dictionary(obj)
         if obj is original:
             return super().default(obj)

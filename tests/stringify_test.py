@@ -2,6 +2,7 @@ import unittest
 import json
 
 import numpy as np
+import pandas as pd
 import torch
 
 from permacache import stringify, stable_hash
@@ -43,4 +44,29 @@ class StringifyTest(unittest.TestCase):
         self.assertEqual(
             self.fast_hash,
             stable_hash(torch.tensor(self.data)),
+        )
+
+    def test_stringify_pandas(self):
+        frame = pd.DataFrame(
+            {
+                "hi": [1, 2, 3],
+                "bye": np.random.RandomState(0).randn(3),
+                "hello": ["a", "b", "c"],
+                "nested": list(np.random.RandomState(5).rand(3, 10)),
+            },
+            index=[None, "a", "b"],
+        )
+        self.assertEqual(
+            "56db9e9bdc460416bf38da8e7f20610a0f24e56e66220ed486e20278754bcf28",
+            stable_hash(frame),
+        )
+        frame.index = ["None", "a", "b"]
+        self.assertEqual(
+            "4910bc9c2474a409127d88a7ddb279b34559bae5114da65f419d4eeaa622fa97",
+            stable_hash(frame),
+        )
+        frame = frame[["bye", "nested", "hello", "hi"]]
+        self.assertEqual(
+            "945c95c1f21efc1185ee4e4bcf3a24263881bc16564ec89ab7bb3a5d313455cb",
+            stable_hash(frame),
         )
