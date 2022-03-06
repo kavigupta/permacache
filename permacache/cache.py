@@ -14,11 +14,11 @@ CACHE = user_cache_dir("permacache")
 
 
 class CachedFunction:
-    def __init__(self, function, key_function, path, *, parallel):
+    def __init__(self, function, key_function, path, *, parallel, **kwargs):
         self.function = function
         self.key_function = key_function
         self.parallel = parallel
-        self.shelf = LockedShelf(path)
+        self.shelf = LockedShelf(path, **kwargs)
 
     def __call__(self, *args, **kwargs):
         key = self.key_function(args, kwargs, parallel=self.parallel)

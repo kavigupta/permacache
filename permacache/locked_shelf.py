@@ -58,7 +58,7 @@ class LockedShelf:
     The cache is mantained over opening and closing of the shelf.
     """
 
-    def __init__(self, path):
+    def __init__(self, path, multiprocess_safe=False):
         try:
             os.makedirs(path)
         except FileExistsError:
@@ -68,6 +68,7 @@ class LockedShelf:
         self.shelve_path = self.path + "/shelf"
         self.shelf = None
         self.cache = None
+        self.multiprocess_safe = multiprocess_safe
 
     def _update(self):
         if self.shelf is None:
@@ -104,7 +105,12 @@ class LockedShelf:
         return self
 
     def __exit__(self, *args, **kwargs):
+        if self.multiprocess_safe:
+            # for multi-processing safety, the only way is to close the shelf every time
+            self.shelf.close()
+            self.shelf = None
         self.lock.__exit__(*args, **kwargs)
 
     def close(self):
-        self.shelf.close()
+        if self.shelf is not None:
+            self.shelf.close()
