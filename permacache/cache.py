@@ -65,14 +65,14 @@ class CachedFunction:
             return [db[k] for k in keys]
 
 
-def permacache(path, key_function=dict(), *, parallel=()):
+def permacache(path, key_function=dict(), *, parallel=(), **kwargs):
     path = os.path.join(CACHE, path)
 
     def annotator(f):
         kf = key_function
         if isinstance(kf, dict):
             kf = dict_function(kf, f)
-        return CachedFunction(f, kf, path, parallel=parallel)
+        return CachedFunction(f, kf, path, parallel=parallel, **kwargs)
 
     return annotator
 
