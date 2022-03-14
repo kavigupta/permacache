@@ -36,6 +36,13 @@ class CachedFunction:
             db[key] = value
         return value
 
+    def cache_contains(self, *args, **kwargs):
+        key = self.key_function(args, kwargs, parallel=self.parallel)
+        assert not isinstance(key, parallel_output), "not supported"
+        key = stringify(key)
+        with self.shelf as db:
+            return key in db
+
     def call_parallel(self, keys, args, kwargs):
         keys = [stringify(key) for key in keys]
         with self.shelf as db:
