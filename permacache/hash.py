@@ -3,12 +3,16 @@ import hashlib
 from types import SimpleNamespace
 import numbers
 
+import enum
+
 
 class TensorEncoder(json.JSONEncoder):
     fast_bytes = False
 
     def default(self, obj):
         original = obj
+        if hasattr(type(obj), "__permacache_hash__"):
+            obj = {".custom": True, "content": type(obj).__permacache_hash__(obj)}
         if hasattr(obj, "__attrs_attrs__"):
             typename = type(obj).__name__
             obj = {a.name: getattr(obj, a.name) for a in obj.__attrs_attrs__}
@@ -29,6 +33,8 @@ class TensorEncoder(json.JSONEncoder):
                 obj = str(obj)
         if isinstance(obj, range):
             obj = {".type": "range", "representation": str(obj)}
+        if isinstance(obj, type):
+            obj = {".type": "type", "name": obj.__module__ + "." + obj.__qualname__}
         if self.isinstance_str(obj, "Module"):
             obj = {
                 ".type": "Module",
@@ -50,6 +56,12 @@ class TensorEncoder(json.JSONEncoder):
                 ".type": "pandas.Series",
                 "index": list(obj.index),
                 "values": list(obj),
+            }
+        if isinstance(obj, enum.Enum):
+            return {
+                ".type": "enum",
+                "enum.name": type(obj).__name__,
+                "enum.value": obj.value,
             }
         obj = fix_dictionary(obj)
         if obj is original:
