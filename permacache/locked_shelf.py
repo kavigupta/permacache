@@ -110,6 +110,13 @@ class LockedShelf:
         self.shelf[key] = value
         self.lock.set_last_modified()
 
+    def __delitem__(self, key):
+        self._update()
+        if key in self.cache:
+            del self.cache[key]
+        del self.shelf[key]
+        self.lock.set_last_modified()
+
     def __enter__(self):
         self.lock.__enter__()
         return self
