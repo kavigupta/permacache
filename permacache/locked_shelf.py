@@ -117,6 +117,10 @@ class LockedShelf:
         del self.shelf[key]
         self.lock.set_last_modified()
 
+    def items(self):
+        self._update()
+        return list(self.shelf.items())
+
     def __enter__(self):
         self.lock.__enter__()
         return self
@@ -124,7 +128,8 @@ class LockedShelf:
     def __exit__(self, *args, **kwargs):
         if self.multiprocess_safe:
             # for multi-processing safety, the only way is to close the shelf every time
-            self.shelf.close()
+            if self.shelf is not None:
+                self.shelf.close()
             self.shelf = None
         self.lock.__exit__(*args, **kwargs)
 
