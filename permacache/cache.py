@@ -4,7 +4,7 @@ import shutil
 
 from appdirs import user_cache_dir
 
-
+from .cache_miss_error import CacheMissError, error_on_miss, error_on_miss_global
 from .locked_shelf import LockedShelf
 from .hash import stringify
 from .dict_function import dict_function, parallel_output
@@ -19,6 +19,15 @@ class CachedFunction:
         self.key_function = key_function
         self.parallel = parallel
         self.shelf = LockedShelf(path, **kwargs)
+        self._error_on_miss = False
+
+    def _run_underlying(self, *args, **kwargs):
+        if self._error_on_miss or error_on_miss_global.error_on_miss:
+            raise CacheMissError
+        return self.function(*args, **kwargs)
+
+    def error_on_miss(self):
+        return error_on_miss(self)
 
     def __call__(self, *args, **kwargs):
         key = self.key_function(args, kwargs, parallel=self.parallel)
@@ -30,7 +39,7 @@ class CachedFunction:
         with self.shelf as db:
             if key in db:
                 return db[key]
-        value = self.function(*args, **kwargs)
+        value = self._run_underlying(*args, **kwargs)
         with self.shelf as db:
             # TODO maybe check if key is now in db
             db[key] = value
@@ -65,7 +74,7 @@ class CachedFunction:
                 arg = [arg[i] for i in indices]
                 arguments[k] = arg
 
-            values_for_indices = self.function(**arguments)
+            values_for_indices = self._run_underlying(**arguments)
         with self.shelf as db:
             for k, v in zip(keys_for_indices, values_for_indices):
                 db[k] = v
