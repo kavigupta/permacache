@@ -9,64 +9,64 @@ import enum
 class TensorEncoder(json.JSONEncoder):
     fast_bytes = False
 
-    def default(self, obj):
-        original = obj
-        if hasattr(type(obj), "__permacache_hash__"):
-            obj = {".custom": True, "content": type(obj).__permacache_hash__(obj)}
-        if hasattr(obj, "__attrs_attrs__"):
-            typename = type(obj).__name__
-            obj = {a.name: getattr(obj, a.name) for a in obj.__attrs_attrs__}
-            obj[".attr.__name__"] = typename
-        if isinstance(obj, SimpleNamespace):
-            obj = obj.__dict__
-            obj[".builtin.__name__"] = "types.SimpleNamespace"
+    def default(self, o):
+        original = o
+        if hasattr(type(o), "__permacache_hash__"):
+            o = {".custom": True, "content": type(o).__permacache_hash__(o)}
+        if hasattr(o, "__attrs_attrs__"):
+            typename = type(o).__name__
+            o = {a.name: getattr(o, a.name) for a in o.__attrs_attrs__}
+            o[".attr.__name__"] = typename
+        if isinstance(o, SimpleNamespace):
+            o = o.__dict__
+            o[".builtin.__name__"] = "types.SimpleNamespace"
         if (
-            type(obj).__module__ == "torch.nn.parameter"
-            and type(obj).__name__ == "Parameter"
+            type(o).__module__ == "torch.nn.parameter"
+            and type(o).__name__ == "Parameter"
         ):
-            obj = obj.data
-        obj = best_effort_to_bytes(obj)
-        if isinstance(obj, bytes):
+            o = o.data
+        o = best_effort_to_bytes(o)
+        if isinstance(o, bytes):
             if self.fast_bytes:
-                obj = hashlib.sha256(obj).hexdigest()
+                o = hashlib.sha256(o).hexdigest()
             else:
-                obj = str(obj)
-        if isinstance(obj, range):
-            obj = {".type": "range", "representation": str(obj)}
-        if isinstance(obj, type):
-            obj = {".type": "type", "name": obj.__module__ + "." + obj.__qualname__}
-        if self.isinstance_str(obj, "Module"):
-            obj = {
+                o = str(o)
+        if isinstance(o, range):
+            o = {".type": "range", "representation": str(o)}
+        if isinstance(o, type):
+            o = {".type": "type", "name": o.__module__ + "." + o.__qualname__}
+        if self.isinstance_str(o, "Module"):
+            o = {
                 ".type": "Module",
                 "hash": dict(
                     other_dict={
-                        k: v for k, v in obj.__dict__.items() if not k.startswith("_")
+                        k: v for k, v in o.__dict__.items() if not k.startswith("_")
                     },
-                    state_dict=obj.state_dict(),
+                    state_dict=o.state_dict(),
                 ),
             }
-        if self.isinstance_str(obj, "DataFrame"):
+        if self.isinstance_str(o, "DataFrame"):
             return {
                 ".type": "pandas.DataFrame",
-                "columns": list(obj),
-                "values": {k: obj[k] for k in obj},
+                "columns": list(o),
+                "values": {k: o[k] for k in o},
             }
-        if self.isinstance_str(obj, "Series"):
+        if self.isinstance_str(o, "Series"):
             return {
                 ".type": "pandas.Series",
-                "index": list(obj.index),
-                "values": list(obj),
+                "index": list(o.index),
+                "values": list(o),
             }
-        if isinstance(obj, enum.Enum):
+        if isinstance(o, enum.Enum):
             return {
                 ".type": "enum",
-                "enum.name": type(obj).__name__,
-                "enum.value": obj.value,
+                "enum.name": type(o).__name__,
+                "enum.value": o.value,
             }
-        obj = fix_dictionary(obj)
-        if obj is original:
-            return super().default(obj)
-        return obj
+        o = fix_dictionary(o)
+        if o is original:
+            return super().default(o)
+        return o
 
     def isinstance_str(self, obj, str_type):
         try:
