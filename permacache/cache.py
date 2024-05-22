@@ -81,7 +81,9 @@ class CachedFunction:
             return [db[k] for k in keys]
 
 
-def permacache(path, key_function=dict(), *, parallel=(), **kwargs):
+def permacache(path, key_function=None, *, parallel=(), **kwargs):
+    if key_function is None:
+        key_function = dict()
     path = os.path.join(CACHE, path)
 
     def annotator(f):
