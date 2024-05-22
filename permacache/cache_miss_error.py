@@ -27,9 +27,13 @@ class error_on_miss_global:
 
     error_on_miss = False
 
+    def __init__(self):
+        self.old = None
+
     def __enter__(self):
         self.old = error_on_miss_global.error_on_miss
         error_on_miss_global.error_on_miss = True
 
     def __exit__(self, *args):
+        assert self.old is not None
         error_on_miss_global.error_on_miss = self.old
