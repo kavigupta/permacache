@@ -2,3 +2,4 @@
 .
 # Tests
 pytest
+parameterized
