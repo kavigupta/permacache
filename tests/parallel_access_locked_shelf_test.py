@@ -1,9 +1,9 @@
 import os
-import shutil
 import random
+import shutil
+import unittest
 
 import numpy as np
-import unittest
 
 from permacache.locked_shelf import LockedShelf
 

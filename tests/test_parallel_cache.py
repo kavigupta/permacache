@@ -1,8 +1,7 @@
 import os
-import shutil
 import random
+import shutil
 import tempfile
-
 import unittest
 
 from permacache import cache
