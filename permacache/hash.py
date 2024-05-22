@@ -105,7 +105,7 @@ def best_effort_to_bytes(obj):
         if type(obj).__name__ == "dtype":
             obj = str(obj).encode("utf-8")
         else:
-            obj = obj.tostring()
+            obj = obj.tobytes()
     return obj
 
 
