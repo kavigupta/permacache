@@ -1,9 +1,8 @@
-import json
-import hashlib
-from types import SimpleNamespace
-import numbers
-
 import enum
+import hashlib
+import json
+import numbers
+from types import SimpleNamespace
 
 
 class TensorEncoder(json.JSONEncoder):

@@ -1,13 +1,12 @@
 import os
-
 import shutil
 
 from appdirs import user_cache_dir
 
 from .cache_miss_error import CacheMissError, error_on_miss, error_on_miss_global
-from .locked_shelf import LockedShelf
-from .hash import stringify
 from .dict_function import dict_function, parallel_output
+from .hash import stringify
+from .locked_shelf import LockedShelf
 from .utils import bind_arguments
 
 CACHE = user_cache_dir("permacache")

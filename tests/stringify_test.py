@@ -1,11 +1,11 @@
-import unittest
 import json
+import unittest
 
 import numpy as np
 import pandas as pd
 import torch
 
-from permacache import stringify, stable_hash
+from permacache import stable_hash, stringify
 
 
 class StringifyTest(unittest.TestCase):

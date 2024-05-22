@@ -1,6 +1,6 @@
 import attr
 
-from .utils import parallelize_arguments, bind_arguments
+from .utils import bind_arguments, parallelize_arguments
 
 DEFAULT_FUNCTIONS = {None: lambda x: None}
 

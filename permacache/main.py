@@ -1,6 +1,6 @@
 import argparse
 
-from .cache import to_file, from_file
+from .cache import from_file, to_file
 
 
 def cache_args(parser):

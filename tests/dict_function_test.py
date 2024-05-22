@@ -12,7 +12,7 @@ class DictFunctionTest(unittest.TestCase):
         self.assertEqual(dict(t=2, v=10, k=2), dict_function(sig, fn)([2], dict(v=10)))
 
     def test_has_function(self):
-        sig = dict(k=lambda x: x ** 2)
+        sig = dict(k=lambda x: x**2)
         self.assertEqual(dict(t=2, k=4, v=3), dict_function(sig, fn)([2], dict()))
         self.assertEqual(dict(t=2, k=100, v=3), dict_function(sig, fn)([2, 10], dict()))
         self.assertEqual(dict(t=2, k=100, v=3), dict_function(sig, fn)([2], dict(k=10)))
@@ -39,7 +39,7 @@ class DictFunctionTest(unittest.TestCase):
         self.assertEqual(dict(t=2), dict_function(sig, fn)([2], dict(v=10)))
 
     def test_parallel(self):
-        sig = dict(t=lambda t: t ** 2, k=str)
+        sig = dict(t=lambda t: t**2, k=str)
         self.assertEqual(
             parallel_output(
                 [dict(t=4, k="2", v=3), dict(t=9, k="2", v=3), dict(t=16, k="2", v=3)]
@@ -56,7 +56,7 @@ class DictFunctionTest(unittest.TestCase):
         )
 
     def test_parallel_multi(self):
-        sig = dict(t=lambda t: t ** 2)
+        sig = dict(t=lambda t: t**2)
         self.assertEqual(
             parallel_output(
                 [dict(t=4, k="a", v=3), dict(t=9, k="b", v=3), dict(t=16, k="c", v=3)]

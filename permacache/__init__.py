@@ -1,5 +1,5 @@
 from .cache import permacache
-from .hash import stringify, stable_hash
+from .cache_miss_error import CacheMissError, error_on_miss_global
 from .dict_function import drop_if, drop_if_equal
+from .hash import stable_hash, stringify
 from .swap_unpickler import swap_unpickler_context_manager
-from .cache_miss_error import error_on_miss_global, CacheMissError

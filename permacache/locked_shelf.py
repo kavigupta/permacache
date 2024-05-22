@@ -1,8 +1,8 @@
 import os
-
-from filelock import FileLock
 import shelve
 import time
+
+from filelock import FileLock
 
 
 class Lock:
