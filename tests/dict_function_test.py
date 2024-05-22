@@ -44,7 +44,7 @@ class DictFunctionTest(unittest.TestCase):
             parallel_output(
                 [dict(t=4, k="2", v=3), dict(t=9, k="2", v=3), dict(t=16, k="2", v=3)]
             ),
-            dict_function(sig, fn)([[2, 3, 4]], dict(), parallel=("t")),
+            dict_function(sig, fn)([[2, 3, 4]], dict(), parallel="t"),
         )
 
         sig = dict(k=str)
@@ -52,7 +52,7 @@ class DictFunctionTest(unittest.TestCase):
             parallel_output(
                 [dict(t=2, k="2", v=3), dict(t=3, k="2", v=3), dict(t=4, k="2", v=3)]
             ),
-            dict_function(sig, fn)([[2, 3, 4]], dict(), parallel=("t")),
+            dict_function(sig, fn)([[2, 3, 4]], dict(), parallel="t"),
         )
 
     def test_parallel_multi(self):
@@ -70,4 +70,4 @@ class DictFunctionTest(unittest.TestCase):
 
 
 def fn(t, k=2, v=3):
-    pass
+    del t, k, v

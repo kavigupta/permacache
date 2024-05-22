@@ -47,7 +47,7 @@ def fn_2(xs, ys):
     return [(x, y) for x, y in zip(xs, ys)]
 
 
-class ParallelCacheTest(unittest.TestCase):
+class ParallelCacheTest2(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.TemporaryDirectory()
         cache.CACHE = self.dir.name
