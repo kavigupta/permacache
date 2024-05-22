@@ -1,4 +1,4 @@
 # Module
 .
 # Tests
-nose
+pytest
