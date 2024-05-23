@@ -99,7 +99,7 @@ def decrement_mtime_ns(path):
     decrement = getattr(decrement_mtime_ns, "decrement", 0)
     decrement += 1
     if decrement > 10000:
-        if random.rand() < 0.5:
+        if random.random() < 0.5:
             decrement = 1
     decrement_mtime_ns.decrement = decrement
     stat = os.stat(path)
