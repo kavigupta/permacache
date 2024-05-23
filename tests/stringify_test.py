@@ -1,4 +1,5 @@
 import json
+import sys
 import unittest
 
 import numpy as np
@@ -10,7 +11,12 @@ from permacache import stable_hash, stringify
 
 class StringifyTest(unittest.TestCase):
     data = np.random.RandomState(0).randn(1000)
-    slow_hash = "16469cff96525e3e190758d793e61f9d798cb87617787bc1312cf7a8b59aa4b2"
+    slow_hash = {
+        # ubuntu
+        "linux": "16469cff96525e3e190758d793e61f9d798cb87617787bc1312cf7a8b59aa4b2",
+        "win32": "16469cff96525e3e190758d793e61f9d798cb87617787bc1312cf7a8b59aa4b2",
+        "darwin": "97d8947421010821dd8f3f7046ef0eccd5c27602c7505a5749c1090a0fe7435b",
+    }[sys.platform]
     fast_hash = "c97fda7d817a32aad65ce77f5043a51410c5893e6bab8e746a23f68c8e483774"
 
     def test_stringify_json(self):
@@ -30,20 +36,21 @@ class StringifyTest(unittest.TestCase):
         )
 
     def test_stringify_numpy(self):
-        print(self.data.sum())
-        print(self.data.tobytes())
         self.assertEqual(
             self.slow_hash,
             stable_hash(self.data, fast_bytes=False),
         )
+
+    def test_stringify_numpy_fast(self):
         self.assertEqual(self.fast_hash, stable_hash(self.data))
-        # 1/0
 
     def test_stringify_torch(self):
         self.assertEqual(
             self.slow_hash,
             stable_hash(torch.tensor(self.data), fast_bytes=False),
         )
+
+    def test_stringify_torch_fast(self):
         self.assertEqual(
             self.fast_hash,
             stable_hash(torch.tensor(self.data)),
