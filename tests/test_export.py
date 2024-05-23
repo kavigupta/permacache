@@ -13,7 +13,7 @@ def fn(x, y=2, z=3, *args):
 class ExportTest(unittest.TestCase):
     def test_basic_export(self):
         with tempfile.TemporaryDirectory() as dir1:
-            cache.CACHE = dir1.name
+            cache.CACHE = dir1
             zipfile = tempfile.mktemp()
             fn.counter = 0
             cache.permacache("f")(fn)(1, 2, 3)
