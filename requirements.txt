@@ -4,6 +4,7 @@
 pytest
 parameterized
 pylint
+black # we test that the code is correctly formatted
 
 # we test that these are correctly stringified
 attrs
