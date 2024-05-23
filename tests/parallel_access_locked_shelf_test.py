@@ -1,4 +1,6 @@
 import shutil
+import threading
+import time
 import unittest
 
 import numpy as np
@@ -9,34 +11,37 @@ from permacache.locked_shelf import LockedShelf
 
 class LockedShelfTest(unittest.TestCase):
     @parameterized.expand([(seed,) for seed in range(100)])
-    def get_then_set_test(self, seed):
-        rng = np.random.RandomState(seed)
-        shelf1 = LockedShelf("temp/tempshelf", multiprocess_safe=True)
-        shelf2 = LockedShelf("temp/tempshelf", multiprocess_safe=True)
+    def test_get_then_set(self, seed):
+        def thread(key, value, seed):
+            shelf = LockedShelf("temp/tempshelf", multiprocess_safe=True)
+            rng = np.random.RandomState(seed)
 
-        def set1():
-            with shelf1 as f:
-                f["a"] = 2
+            def maybe_sleep():
+                if rng.rand() < 0.5:
+                    time.sleep(rng.rand() * 0.1)
 
-        def set2():
-            with shelf2 as f:
-                f["b"] = 3
+            with shelf as f:
+                maybe_sleep()
+                f[key] = value
 
-        def close1():
-            shelf1.close()
+            maybe_sleep()
+            shelf.close()
 
-        def close2():
-            shelf2.close()
+        threads = [
+            threading.Thread(target=thread, args=("a", 2, seed)),
+            threading.Thread(target=thread, args=("b", 3, seed + 1000)),
+        ]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
 
-        queues = [[set1, close1], [set2, close2]]
-        while any(queues):
-            idx = rng.choice(len(queues))
-            fn = queues[idx].pop(0)
-            print(fn)
-            fn()
-            if not queues[idx]:
-                queues.pop(idx)
         with LockedShelf("temp/tempshelf") as f:
             self.assertEqual(f["a"], 2)
             self.assertEqual(f["b"], 3)
-        shutil.rmtree("temp")
+
+    def tearDown(self):
+        try:
+            shutil.rmtree("temp")
+        except FileNotFoundError:
+            pass
