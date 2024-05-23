@@ -7,7 +7,7 @@ from permacache.out_file_cache import (
     add_file_cache_info,
     do_copy_files,
     process_out_file_parameter,
-    remove_out_files,
+    split_out_files,
 )
 
 from .cache_miss_error import CacheMissError, error_on_miss, error_on_miss_global
@@ -98,7 +98,7 @@ class FileCachedFunction(CachedFunction):
 
     def __call__(self, *args, **kwargs):
         key_full = self.key_function(args, kwargs, parallel=self.parallel)
-        key, out_files = remove_out_files(key_full)
+        key, out_files = split_out_files(key_full)
         assert not isinstance(
             key, parallel_output
         ), "should be impossible due to prior validation"
