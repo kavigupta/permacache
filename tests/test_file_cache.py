@@ -15,7 +15,6 @@ def single_output(x, y=2, *, out_file):
 
 
 class PermacacheTest(unittest.TestCase):
-
     def setUp(self):
         # we clean this up in tearDown
         # pylint: disable=consider-using-with
