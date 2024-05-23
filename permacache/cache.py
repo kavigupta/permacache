@@ -3,6 +3,13 @@ import shutil
 
 from appdirs import user_cache_dir
 
+from permacache.out_file_cache import (
+    add_file_cache_info,
+    do_copy_files,
+    process_out_file_parameter,
+    remove_out_files,
+)
+
 from .cache_miss_error import CacheMissError, error_on_miss, error_on_miss_global
 from .dict_function import dict_function, parallel_output
 from .hash import stringify
@@ -80,15 +87,62 @@ class CachedFunction:
             return [db[k] for k in keys]
 
 
-def permacache(path, key_function=None, *, parallel=(), **kwargs):
+class FileCachedFunction(CachedFunction):
+    """
+    Like CachedFunction, but with out files that store the actual contents
+    """
+
+    def __init__(self, *args, out_files, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.out_files = out_files
+
+    def __call__(self, *args, **kwargs):
+        key_full = self.key_function(args, kwargs, parallel=self.parallel)
+        key, out_files = remove_out_files(key_full)
+        assert not isinstance(
+            key, parallel_output
+        ), "should be impossible due to prior validation"
+
+        key = stringify(key)
+
+        with self.shelf as db:
+            if key in db:
+                result, file_cache_info = db[key]
+                file_cache_info, success = do_copy_files(file_cache_info, out_files)
+                if success:
+                    return result
+            else:
+                file_cache_info = {}
+        value = self._run_underlying(*args, **kwargs)
+        file_cache_info = add_file_cache_info(file_cache_info, out_files)
+        with self.shelf as db:
+            db[key] = value, file_cache_info
+        return value
+
+    def cache_contains(self, *args, **kwargs):
+        key = self.key_function(args, kwargs, parallel=self.parallel)
+        assert not isinstance(key, parallel_output), "not supported"
+        key = stringify(key)
+        with self.shelf as db:
+            return key in db
+
+
+def permacache(path, key_function=None, *, parallel=(), out=None, **kwargs):
     if key_function is None:
         key_function = dict()
     path = os.path.join(CACHE, path)
+
+    if out is not None:
+        out, key_function = process_out_file_parameter(key_function, parallel, out)
 
     def annotator(f):
         kf = key_function
         if isinstance(kf, dict):
             kf = dict_function(kf, f)
+        if out is not None:
+            return FileCachedFunction(
+                f, kf, path, parallel=parallel, out_files=out, **kwargs
+            )
         return CachedFunction(f, kf, path, parallel=parallel, **kwargs)
 
     return annotator
