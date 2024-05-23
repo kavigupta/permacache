@@ -10,7 +10,7 @@ def fn(x, y=2, z=3, *args):
     return x, y, z, args
 
 
-class LockedShelfTest(unittest.TestCase):
+class PermacacheTest(unittest.TestCase):
     def setUp(self):
         # we clean this up in tearDown
         # pylint: disable=consider-using-with
