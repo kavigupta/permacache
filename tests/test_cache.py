@@ -1,6 +1,3 @@
-import os
-import random
-import shutil
 import tempfile
 import unittest
 
