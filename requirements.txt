@@ -3,6 +3,7 @@
 # Tests
 pytest
 parameterized
+pylint
 
 # we test that these are correctly stringified
 attrs
