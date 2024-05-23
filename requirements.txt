@@ -3,4 +3,8 @@
 # Tests
 pytest
 parameterized
-attrs # we test that these are correctly stringified
+# we test that these are correctly stringified
+attrs
+numpy
+pandas
+torch
