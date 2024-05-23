@@ -9,7 +9,7 @@ def fn(xs, ys):
     return [(x, ys) for x in xs]
 
 
-class ParallelCacheTest(unittest.TestCase):
+class ParallelCacheTestNonFullyParallel(unittest.TestCase):
     def setUp(self):
         # we clean this up in tearDown
         # pylint: disable=consider-using-with
@@ -46,7 +46,7 @@ def fn_2(xs, ys):
     return list(zip(xs, ys))
 
 
-class ParallelCacheTest2(unittest.TestCase):
+class ParallelCacheTestFullyParallel(unittest.TestCase):
     def setUp(self):
         # we clean this up in tearDown
         # pylint: disable=consider-using-with

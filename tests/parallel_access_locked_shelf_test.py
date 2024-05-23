@@ -2,6 +2,7 @@ import shutil
 import unittest
 
 import numpy as np
+from parameterized import parameterized
 
 from parameterized import parameterized
 
