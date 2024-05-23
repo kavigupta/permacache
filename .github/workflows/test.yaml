@@ -24,8 +24,8 @@ jobs:
           pip install -r requirements.txt
       - name: Test with pytest
         run: |
-          pytest tests
+          python -m pytest tests
       - name: Lint with pylint
         run: |
-          pylint permacache setup.py tests
+          python -m pylint permacache setup.py tests
           isort permacache tests; black permacache tests; bash -c '[ $(git status --porcelain --untracked-files=no | wc -c) -eq 0 ]  || (git status; git diff; exit 1)'
