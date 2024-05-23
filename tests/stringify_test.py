@@ -31,12 +31,13 @@ class StringifyTest(unittest.TestCase):
 
     def test_stringify_numpy(self):
         print(self.data.sum())
-        print(self.data.bytes())
+        print(self.data.tobytes())
         self.assertEqual(
             self.slow_hash,
             stable_hash(self.data, fast_bytes=False),
         )
         self.assertEqual(self.fast_hash, stable_hash(self.data))
+        # 1/0
 
     def test_stringify_torch(self):
         self.assertEqual(
