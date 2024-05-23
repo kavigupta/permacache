@@ -7,10 +7,12 @@ from parameterized import parameterized
 
 from permacache import cache
 
+
 def multi(f):
     if sys.platform == "win32":
         return None
     return parameterized.expand([(seed,) for seed in range(10)])(f)
+
 
 def single_output(x, y=2, *, out_file):
     single_output.counter += 1

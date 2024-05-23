@@ -1,7 +1,7 @@
 import os
 import shutil
-from dataclasses import dataclass
 import sys
+from dataclasses import dataclass
 
 
 @dataclass
