@@ -1,4 +1,5 @@
-import attr
+from dataclasses import dataclass
+from typing import List
 
 from .utils import bind_arguments, parallelize_arguments
 
@@ -11,9 +12,9 @@ class drop_if:
         self.mapper = mapper
 
 
-@attr.s
+@dataclass
 class parallel_output:
-    values = attr.ib()
+    values: List[object]
 
 
 def drop_if_equal(value, mapper=lambda x: x):
