@@ -1,4 +1,11 @@
 # Module
--e .
+.
 # Tests
-nose
+pytest
+parameterized
+
+# we test that these are correctly stringified
+attrs
+numpy
+pandas
+torch
