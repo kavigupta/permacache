@@ -1,5 +1,9 @@
 # Module
 .
+
+# Installation
+setuptools
+
 # Tests
 pytest
 parameterized
