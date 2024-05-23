@@ -1,4 +1,5 @@
 import os
+import sys
 import tempfile
 import unittest
 
@@ -6,6 +7,10 @@ from parameterized import parameterized
 
 from permacache import cache
 
+def multi(f):
+    if sys.platform == "win32":
+        return None
+    return parameterized.expand([(seed,) for seed in range(10)])(f)
 
 def single_output(x, y=2, *, out_file):
     single_output.counter += 1
@@ -42,8 +47,6 @@ class PermacacheTest(unittest.TestCase):
     def writeToPath(self, path, value):
         with open(self.out_path(path), "w") as f:
             f.write(value)
-
-    multi = parameterized.expand([(seed,) for seed in range(10)])
 
     @multi
     def test_basic(self, _):

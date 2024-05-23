@@ -1,6 +1,7 @@
 import os
 import shutil
 from dataclasses import dataclass
+import sys
 
 
 @dataclass
@@ -9,6 +10,8 @@ class OutFile:
 
 
 def process_out_file_parameter(key_function, parallel, out_file):
+    if sys.platform == "win32":
+        raise ValueError("out files are not supported on windows")
     if isinstance(out_file, str):
         out_file = (out_file,)
     if isinstance(out_file, list):
@@ -51,7 +54,6 @@ def do_copy_file(file_cache, out_path):
                 file_cache_valid[path] = file_cache[path]
         except FileNotFoundError:
             pass
-    print(file_cache, file_cache_valid)
     if out_path in file_cache_valid:
         return file_cache_valid, True
     if not file_cache_valid:
