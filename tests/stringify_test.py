@@ -17,7 +17,11 @@ class StringifyTest(unittest.TestCase):
         "win32": "16469cff96525e3e190758d793e61f9d798cb87617787bc1312cf7a8b59aa4b2",
         "darwin": "97d8947421010821dd8f3f7046ef0eccd5c27602c7505a5749c1090a0fe7435b",
     }[sys.platform]
-    fast_hash = "c97fda7d817a32aad65ce77f5043a51410c5893e6bab8e746a23f68c8e483774"
+    fast_hash = {
+        "linux": "c97fda7d817a32aad65ce77f5043a51410c5893e6bab8e746a23f68c8e483774",
+        "win32": "c97fda7d817a32aad65ce77f5043a51410c5893e6bab8e746a23f68c8e483774",
+        "darwin": "76ce19673caf9532d68730c7f83bfe8e6f521cc001c2d43373f9c4f33c925037",
+    }[sys.platform]
 
     def test_stringify_json(self):
         self.assertEqual("2", stringify(2))
