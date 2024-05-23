@@ -120,11 +120,8 @@ class FileCachedFunction(CachedFunction):
         return value
 
     def cache_contains(self, *args, **kwargs):
-        key = self.key_function(args, kwargs, parallel=self.parallel)
-        assert not isinstance(key, parallel_output), "not supported"
-        key = stringify(key)
-        with self.shelf as db:
-            return key in db
+        del args, kwargs
+        raise NotImplementedError("not implemented for outfile cache")
 
 
 def permacache(path, key_function=None, *, parallel=(), out=None, **kwargs):
