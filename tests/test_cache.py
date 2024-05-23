@@ -7,6 +7,7 @@ import unittest
 from permacache import cache
 
 
+# pylint: disable=keyword-arg-before-vararg
 def fn(x, y=2, z=3, *args):
     fn.counter += 1
     return x, y, z, args
@@ -14,6 +15,8 @@ def fn(x, y=2, z=3, *args):
 
 class LockedShelfTest(unittest.TestCase):
     def setUp(self):
+        # we clean this up in tearDown
+        # pylint: disable=consider-using-with
         self.dir = tempfile.TemporaryDirectory()
         cache.CACHE = self.dir.name
         fn.counter = 0

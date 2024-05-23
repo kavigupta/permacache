@@ -7,6 +7,7 @@ import unittest
 from permacache import cache
 
 
+# pylint: disable=keyword-arg-before-vararg
 def fn(x, y=2, z=3, *args):
     fn.counter += 1
     return x, y, z, args

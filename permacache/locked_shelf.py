@@ -17,7 +17,8 @@ class Lock:
         try:
             with open(self.time_path) as f:
                 return float(f.read())
-        except:
+        # pylint: disable=broad-except
+        except Exception:
             self.set_last_modified()
             return self._get_last_modified()
 
@@ -86,9 +87,8 @@ class LockedShelf:
     def _read_from_underlying_shelf(self, key):
         if self.read_from_shelf_context_manager is None:
             return self.shelf[key]
-        else:
-            with self.read_from_shelf_context_manager:
-                return self.shelf[key]
+        with self.read_from_shelf_context_manager:
+            return self.shelf[key]
 
     def __getitem__(self, key):
         self._update()

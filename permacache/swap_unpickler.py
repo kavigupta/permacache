@@ -11,7 +11,8 @@ class swap_unpickler_context_manager:
         self._previous_unpickler = shelve.Unpickler
         shelve.Unpickler = self._unpickler_class
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, typ, value, traceback):
+        del typ, value, traceback
         if self._previous_unpickler is not None:
             shelve.Unpickler = self._previous_unpickler
             self._previous_unpickler = None

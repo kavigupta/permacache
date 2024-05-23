@@ -14,6 +14,8 @@ def fn(xs, ys):
 
 class ParallelCacheTest(unittest.TestCase):
     def setUp(self):
+        # we clean this up in tearDown
+        # pylint: disable=consider-using-with
         self.dir = tempfile.TemporaryDirectory()
         cache.CACHE = self.dir.name
         fn.counter = 0
@@ -44,11 +46,13 @@ class ParallelCacheTest(unittest.TestCase):
 
 def fn_2(xs, ys):
     fn_2.counter += len(xs)
-    return [(x, y) for x, y in zip(xs, ys)]
+    return list(zip(xs, ys))
 
 
 class ParallelCacheTest(unittest.TestCase):
     def setUp(self):
+        # we clean this up in tearDown
+        # pylint: disable=consider-using-with
         self.dir = tempfile.TemporaryDirectory()
         cache.CACHE = self.dir.name
         fn_2.counter = 0
