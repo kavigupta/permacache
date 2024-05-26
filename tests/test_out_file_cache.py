@@ -7,7 +7,6 @@ from parameterized import parameterized_class
 
 from permacache import cache
 
-
 seeds = [(seed,) for seed in range(10)] if sys.platform != "win32" else []
 
 
