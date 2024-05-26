@@ -124,21 +124,23 @@ class FileCachedFunction(CachedFunction):
         raise NotImplementedError("not implemented for outfile cache")
 
 
-def permacache(path, key_function=None, *, parallel=(), out=None, **kwargs):
+def permacache(path, key_function=None, *, parallel=(), out_file=None, **kwargs):
     if key_function is None:
         key_function = dict()
     path = os.path.join(CACHE, path)
 
-    if out is not None:
-        out, key_function = process_out_file_parameter(key_function, parallel, out)
+    if out_file is not None:
+        out_file, key_function = process_out_file_parameter(
+            key_function, parallel, out_file
+        )
 
     def annotator(f):
         kf = key_function
         if isinstance(kf, dict):
             kf = dict_function(kf, f)
-        if out is not None:
+        if out_file is not None:
             return FileCachedFunction(
-                f, kf, path, parallel=parallel, out_files=out, **kwargs
+                f, kf, path, parallel=parallel, out_files=out_file, **kwargs
             )
         return CachedFunction(f, kf, path, parallel=parallel, **kwargs)
 
