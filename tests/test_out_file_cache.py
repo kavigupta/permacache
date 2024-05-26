@@ -2,7 +2,6 @@ import os
 import sys
 import tempfile
 import unittest
-from abc import ABC, abstractmethod
 
 from parameterized import parameterized_class
 
@@ -12,10 +11,9 @@ from permacache import cache
 seeds = [(seed,) for seed in range(10)] if sys.platform != "win32" else []
 
 
-class GenericOutFileCache(unittest.TestCase, ABC):
-    @abstractmethod
+class GenericOutFileCacheTest(unittest.TestCase):
     def get_function(self):
-        pass
+        raise NotImplementedError
 
     def setUp(self):
         # we clean this up in tearDown
@@ -57,7 +55,7 @@ single_output.counter = 0
 
 
 @parameterized_class(("seed",), seeds)
-class SingleOutputTest(GenericOutFileCache):
+class SingleOutputTest(GenericOutFileCacheTest):
     def get_function(self):
         return cache.permacache("func", out_file="out_file")(single_output)
 
@@ -154,7 +152,7 @@ multi_output.counter = 0
 
 
 @parameterized_class(("seed",), seeds)
-class MultiOutputTest(GenericOutFileCache):
+class MultiOutputTest(GenericOutFileCacheTest):
     def get_function(self):
         return cache.permacache("func", out_file=["out_file1", "out_file2"])(
             multi_output
