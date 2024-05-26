@@ -55,3 +55,25 @@ def f(x, y=2, z=3, t=0):
 ```
 
 In the above code, `t` is dropped from consideration if `t == 0`, allowing us to reuse our old calls.
+
+## Out Files
+
+You can specify one or more input parameters to be the "out files" of the function. These are files
+    that the function creates and writes to. If the function is called with the same arguments except
+    for these paths, the function will not be recomputed, so long as some path still exists that was
+    written to by this function historically. This is useful for functions whose output is writing
+    to a file rather than returning a value. The function can also have a return value, which is
+    cached normally.
+
+You are responsible for ensuring that the output parameter is not used in the body of the function
+    except for writing to it.
+
+This feature is not supported on Windows.
+
+```python
+@permacache("path/f", out_file=["loc"])
+def f(x, loc):
+    with open(loc, "w") as f:
+        f.write(str(x) * 10000)
+    return [x]
+```
