@@ -19,8 +19,6 @@ jobs:
             numpy-version: "1.24.2"
           - os: windows-latest
             numpy-version: "2.0.0"
-          - os: macos-latest
-            numpy-version: "2.0.0"
 
 
     steps:
