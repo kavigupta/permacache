@@ -67,6 +67,7 @@ def do_copy_file(file_cache, out_path):
     """
     Helper function for do_copy_files that copies a single file.
     """
+    out_path = os.path.abspath(out_path)
     file_cache_valid = {}
     for path in file_cache:
         try:
