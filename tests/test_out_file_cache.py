@@ -72,7 +72,6 @@ class SingleOutputTest(GenericOutFileCacheTest):
         self.assertCounter(1)
         self.assertAtPath("abc", "246")
 
-
     def test_overwrite_self_same_abspath(self):
         self.assertCounter(0)
         self.assertEqual(self.f(123, out_file=self.out_path("abc")), [123, 2])
