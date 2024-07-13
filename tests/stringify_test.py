@@ -8,7 +8,7 @@ import torch
 
 from permacache import stable_hash, stringify
 
-NUMPY_VERSION = np.version.version.split(".")[0]
+NUMPY_VERSION = np.version.version.split(".", maxsplit=1)[0]
 
 
 class StringifyTest(unittest.TestCase):
