@@ -39,6 +39,7 @@ class StringifyTest(unittest.TestCase):
         )
 
     def test_stringify_numpy(self):
+        print(self.data.tobytes())
         self.assertEqual(
             self.slow_hash,
             stable_hash(self.data, fast_bytes=False),
