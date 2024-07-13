@@ -8,18 +8,26 @@ import torch
 
 from permacache import stable_hash, stringify
 
+NUMPY_VERSION = np.version.version.split(".")[0]
+
 
 class StringifyTest(unittest.TestCase):
     data = np.random.RandomState(0).randn(1000)
     slow_hash = {
         "linux": "16469cff96525e3e190758d793e61f9d798cb87617787bc1312cf7a8b59aa4b2",
         "win32": "faaa45dfa377870db4d547ca91187566b6b74983adaf16241a80ef96af592285",
-        "darwin": "",
+        "darwin": {
+            "1": "97d8947421010821dd8f3f7046ef0eccd5c27602c7505a5749c1090a0fe7435b",
+            "2": "f80b352d29bedc2147f6d5a3623226c7f350bbab1f743ffe0a257132c5a60597",
+        }[NUMPY_VERSION],
     }[sys.platform]
     fast_hash = {
         "linux": "c97fda7d817a32aad65ce77f5043a51410c5893e6bab8e746a23f68c8e483774",
         "win32": "387b1ef12b70d4df0984846b753fbcceb1b7d079256e75479810b6a15d668b70",
-        "darwin": "",
+        "darwin": {
+            "1": "76ce19673caf9532d68730c7f83bfe8e6f521cc001c2d43373f9c4f33c925037",
+            "2": "a0128e05b5d5ceab4d1b5716c5ce3339b25f3ef6a1208383e6c99afdc2b519c1",
+        }[NUMPY_VERSION],
     }[sys.platform]
 
     def test_stringify_json(self):
