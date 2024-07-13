@@ -32,6 +32,8 @@ def f(large_argument, not_json_argument, transient_flag):
 
 The dictionary has keys that correspond to each of the arguments, and the values are applied to them before placing them in the key. Here, `stable_hash` can be used to hash the json stringification of the value, saving disk space but making recovering the value impossible if you want to do that later. Additionally, `str` can be used to stringify objects that you are convinced have stable `str` representations but cannot be represented in json. Finally, the flag argument is ignored in the JSON representation, this is useful for verbosity flags, etc., that don't affect the output.
 
+**Extremely important note**: If you use `stable_hash`, it is only guaranteed to be stable for the same major version of `numpy` (numpy `1.*.*` vs `2.*.*`) and the same operating system. On Ubuntu it does appear to be stable across versions of `numpy`, but this is not true on Mac OS.
+
 ## Aliasing
 
 Permacache uses the underlying function signature to construct the key. For example, for the function
