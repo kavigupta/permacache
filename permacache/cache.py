@@ -1,5 +1,7 @@
 import os
 import shutil
+import sys
+from pickle import UnpicklingError
 
 from appdirs import user_cache_dir
 
@@ -44,7 +46,14 @@ class CachedFunction:
 
         with self.shelf as db:
             if key in db:
-                return db[key]
+                try:
+                    return db[key]
+                except UnpicklingError as e:
+                    # total hack. not sure why this is happening
+                    print(f"Unpickling error: {e}", file=sys.stderr)
+                    print(repr(key), file=sys.stderr)
+                    print("Deleting key", file=sys.stderr)
+                    del db[key]
         value = self._run_underlying(*args, **kwargs)
         with self.shelf as db:
             # TODO maybe check if key is now in db
