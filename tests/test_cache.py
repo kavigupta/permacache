@@ -7,7 +7,8 @@ from permacache.swap_unpickler import (
     swap_unpickler_context_manager,
 )
 
-from .test_module.a import X as a_X, Y as a_Y
+from .test_module.a import X as a_X
+from .test_module.a import Y as a_Y
 from .test_module.b import X as b_X
 
 

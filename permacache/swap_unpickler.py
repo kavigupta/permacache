@@ -1,6 +1,5 @@
 import pickle
 import shelve
-
 from typing import Dict, Tuple, Union
 
 
@@ -46,7 +45,6 @@ def renamed_symbol_unpickler(
         symbol_rename_map_string[(module, name)] = new_symbol
 
     class RenamedSymbolUnpickler(pickle.Unpickler):
-
         def find_class(self, module, name):
             if (module, name) in symbol_rename_map_string:
                 module, name = symbol_rename_map_string[(module, name)]
