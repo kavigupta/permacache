@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="permacache",
-    version="3.7.3",
+    version="3.8.0",
     author="Kavi Gupta",
     author_email="permacache@kavigupta.org",
     description="Permanant cache.",
