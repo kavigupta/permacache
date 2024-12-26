@@ -16,6 +16,14 @@ class TensorEncoder(json.JSONEncoder):
             typename = type(o).__name__
             o = {a.name: getattr(o, a.name) for a in o.__attrs_attrs__}
             o[".attr.__name__"] = typename
+        if hasattr(o, "__dataclass_fields__"):
+            typename = type(o).__name__
+            is_migrated_attrs = getattr(o, "_migrated_attrs", False)
+            o = {a: getattr(o, a) for a in o.__dataclass_fields__}
+            if is_migrated_attrs:
+                o[".attr.__name__"] = typename
+            else:
+                o[".dataclass.__name__"] = typename
         if isinstance(o, SimpleNamespace):
             o = o.__dict__
             o[".builtin.__name__"] = "types.SimpleNamespace"
@@ -120,3 +128,12 @@ def stable_hash(obj, *, fast_bytes=True):
     return hashlib.sha256(
         stringify(obj, fast_bytes=fast_bytes).encode("utf-8")
     ).hexdigest()
+
+
+def migrated_attrs(cls):
+    """
+    Decorator to mark a class as having been migrated from attrs to dataclasses.
+    """
+    # pylint: disable=protected-access
+    cls._migrated_attrs = True
+    return cls
