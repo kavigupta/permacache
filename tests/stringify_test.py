@@ -7,6 +7,7 @@ import pandas as pd
 import torch
 
 from permacache import stable_hash, stringify
+from tests.test_module.c import A, B, C, D
 
 NUMPY_VERSION = np.version.version.split(".", maxsplit=1)[0]
 
@@ -36,14 +37,27 @@ class StringifyTest(unittest.TestCase):
         self.assertEqual('{"a": 3}', stringify({"a": 3}))
 
     def test_stringify_attrs(self):
-        import attr
-
-        @attr.s
-        class X:
-            y = attr.ib()
-
         self.assertEqual(
-            json.dumps({".attr.__name__": "X", "y": "hello"}), stringify(X("hello"))
+            json.dumps({".attr.__name__": "A", "x": 1, "y": "hello", "z": 3.2}),
+            stringify(A(1, "hello", 3.2)),
+        )
+
+    def test_stringify_attr_dataclass(self):
+        self.assertEqual(
+            json.dumps({".attr.__name__": "B", "x": 1, "y": "hello", "z": 3.2}),
+            stringify(B(1, "hello", 3.2)),
+        )
+
+    def test_stringify_dataclass(self):
+        self.assertEqual(
+            json.dumps({".dataclass.__name__": "C", "x": 1, "y": "hello", "z": 3.2}),
+            stringify(C(1, "hello", 3.2)),
+        )
+
+    def test_migrated_dataclass(self):
+        self.assertEqual(
+            json.dumps({".attr.__name__": "D", "x": 1, "y": "hello", "z": 3.2}),
+            stringify(D(1, "hello", 3.2)),
         )
 
     def test_stringify_numpy(self):
