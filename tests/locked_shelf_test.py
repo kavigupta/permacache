@@ -45,3 +45,8 @@ class LockedShelfTest(unittest.TestCase):
                         self.assertEqual(s[k], d[k])
                     else:
                         self.assertFalse(k in s)
+
+
+class LockedShelfTestLargeObjects(LockedShelfTest):
+    def setUp(self):
+        self.shelf = LockedShelf("temp/tempshelf", allow_large_values=True)

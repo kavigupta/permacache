@@ -60,7 +60,11 @@ class LockedShelf:
     """
 
     def __init__(
-        self, path, multiprocess_safe=False, read_from_shelf_context_manager=None
+        self,
+        path,
+        multiprocess_safe=False,
+        read_from_shelf_context_manager=None,
+        allow_large_values=False,
     ):
         try:
             os.makedirs(path)
@@ -73,10 +77,17 @@ class LockedShelf:
         self.cache = None
         self.multiprocess_safe = multiprocess_safe
         self.read_from_shelf_context_manager = read_from_shelf_context_manager
+        self.allow_large_values = allow_large_values
+
+    @property
+    def shelf_kwargs(self):
+        if self.allow_large_values:
+            return {"protocol": 5}
+        return {}
 
     def _update(self):
         if self.shelf is None:
-            self.shelf = shelve.open(self.shelve_path)
+            self.shelf = shelve.open(self.shelve_path, **self.shelf_kwargs)
             self.cache = {}
         else:
             assert self.cache is not None
