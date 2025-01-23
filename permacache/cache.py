@@ -5,6 +5,7 @@ from pickle import UnpicklingError
 
 from appdirs import user_cache_dir
 
+from permacache.no_cache import no_cache_global
 from permacache.out_file_cache import (
     add_file_cache_info,
     do_copy_files,
@@ -38,6 +39,9 @@ class CachedFunction:
         return error_on_miss(self)
 
     def __call__(self, *args, **kwargs):
+        if no_cache_global.no_cache:
+            return self._run_underlying(*args, **kwargs)
+
         key = self.key_function(args, kwargs, parallel=self.parallel)
         if isinstance(key, parallel_output):
             return self.call_parallel(key.values, args, kwargs)
