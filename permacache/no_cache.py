@@ -1,5 +1,3 @@
-
-
 class no_cache_global:
     """
     context manager that sets the error on miss attribute globally, and the

@@ -54,6 +54,7 @@ class PermacacheTest(unittest.TestCase):
             self.assertEqual(self.f(1, 2, 3), (1, 2, 3, ()))
         self.assertEqual(fn.counter, 2)
 
+
 def g(x):
     g.counter += 1
     return a_X(x)
