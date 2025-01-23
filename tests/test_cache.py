@@ -1,7 +1,7 @@
 import tempfile
 import unittest
 
-from permacache import cache
+from permacache import cache, no_cache_global
 from permacache.swap_unpickler import (
     renamed_symbol_unpickler,
     swap_unpickler_context_manager,
@@ -43,6 +43,16 @@ class PermacacheTest(unittest.TestCase):
         self.assertEqual(fn.counter, 2)
         self.assertEqual(self.f(3, 2, 1, 0, -1), (3, 2, 1, (0, -1)))
         self.assertEqual(fn.counter, 3)
+
+    def test_basic_with_disabled_cache(self):
+        self.assertEqual(fn.counter, 0)
+        self.assertEqual(self.f(1, 2, 3), (1, 2, 3, ()))
+        self.assertEqual(fn.counter, 1)
+        self.assertEqual(self.f(1, 2, 3), (1, 2, 3, ()))
+        self.assertEqual(fn.counter, 1)
+        with no_cache_global():
+            self.assertEqual(self.f(1, 2, 3), (1, 2, 3, ()))
+        self.assertEqual(fn.counter, 2)
 
 
 def g(x):
