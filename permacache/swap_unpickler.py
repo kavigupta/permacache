@@ -22,7 +22,7 @@ class swap_unpickler_context_manager:
 
 
 def renamed_symbol_unpickler(
-    symbol_rename_map: Dict[Tuple[str, str], Union[Tuple[str, str], type]]
+    symbol_rename_map: Dict[Tuple[str, str], Union[Tuple[str, str], type]],
 ) -> type:
     """
     Returns an unpickler class that renames symbols as specified in

@@ -1,6 +1,7 @@
 import os
 import shutil
 import sys
+from functools import wraps
 from pickle import UnpicklingError
 
 from appdirs import user_cache_dir
@@ -152,10 +153,12 @@ def permacache(path, key_function=None, *, parallel=(), out_file=None, **kwargs)
         if isinstance(kf, dict):
             kf = dict_function(kf, f)
         if out_file is not None:
-            return FileCachedFunction(
-                f, kf, path, parallel=parallel, out_files=out_file, **kwargs
+            return wraps(f)(
+                FileCachedFunction(
+                    f, kf, path, parallel=parallel, out_files=out_file, **kwargs
+                )
             )
-        return CachedFunction(f, kf, path, parallel=parallel, **kwargs)
+        return wraps(f)(CachedFunction(f, kf, path, parallel=parallel, **kwargs))
 
     return annotator
 
