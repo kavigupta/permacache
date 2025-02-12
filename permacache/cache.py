@@ -1,7 +1,7 @@
-from functools import wraps
 import os
 import shutil
 import sys
+from functools import wraps
 from pickle import UnpicklingError
 
 from appdirs import user_cache_dir
