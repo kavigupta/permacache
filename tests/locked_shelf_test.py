@@ -49,6 +49,9 @@ class LockedShelfTest(unittest.TestCase):
                     else:
                         self.assertFalse(k in s)
 
+        with self.shelf as s:
+            self.assertEqual(sorted(d.items(), key=str), sorted(s.items(), key=str))
+
     def test_large_key(self):
         with self.shelf as s:
             s["a" * 100] = "b"
