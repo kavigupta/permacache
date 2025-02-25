@@ -191,7 +191,7 @@ class IndividualFileLockedStore:
         temporary_path = self._path_for_key(key) + "." + uuid.uuid4().hex[:10]
         with open(temporary_path, "w") as f:
             json.dump({key: value}, f)
-        os.rename(temporary_path, self._path_for_key(key))
+        os.replace(temporary_path, self._path_for_key(key))
 
     def __delitem__(self, key):
         os.remove(self._path_for_key(key))
