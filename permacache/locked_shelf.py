@@ -164,7 +164,6 @@ class IndividualFileLockedStore:
     def __init__(
         self,
         path,
-        read_from_shelf_context_manager=None,
         multiprocess_safe=False,
         driver="json",
     ):
@@ -175,7 +174,6 @@ class IndividualFileLockedStore:
         self.path = path
         self.lock = Lock(self.path + "/lock", self.path + "/time")
         self.cache = None
-        self.read_from_shelf_context_manager = read_from_shelf_context_manager
         self.multi_process_safe = multiprocess_safe
         assert driver in ("json", "pickle"), "driver must be json or pickle"
         self.driver = driver
