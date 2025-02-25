@@ -199,7 +199,7 @@ class IndividualFileLockedStore:
     def items(self):
         for filename in os.listdir(self.path):
             with open(os.path.join(self.path, filename), "r") as f:
-                yield json.load(f)
+                yield from json.load(f).items()
 
     def __enter__(self):
         if self.multi_process_safe:
