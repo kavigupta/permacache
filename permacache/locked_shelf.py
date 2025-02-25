@@ -1,8 +1,12 @@
+import json
 import os
 import shelve
 import time
+import uuid
 
 from filelock import FileLock
+
+from permacache.hash import stable_hash
 
 
 class Lock:
@@ -147,3 +151,64 @@ class LockedShelf:
     def close(self):
         if self.shelf is not None:
             self.shelf.close()
+
+
+class IndividualFileLockedStore:
+    """
+    Like LockedShelf, but stores each key in a separate file. Should be
+    broadly multiprocess safe, but you can enhance this by using the
+    multiprocess_safe flag.
+    """
+
+    def __init__(
+        self, path, read_from_shelf_context_manager=None, multiprocess_safe=False
+    ):
+        try:
+            os.makedirs(path)
+        except FileExistsError:
+            pass
+        self.path = path
+        self.lock = Lock(self.path + "/lock", self.path + "/time")
+        self.cache = None
+        self.read_from_shelf_context_manager = read_from_shelf_context_manager
+        self.multi_process_safe = multiprocess_safe
+
+    def _path_for_key(self, key):
+        if len(key) < 40 and all(c.isalnum() or c in "-_.,[](){} " for c in key):
+            return os.path.join(self.path, "." + key)
+        key = stable_hash(key)[:20]
+        return os.path.join(self.path, key)
+
+    def __getitem__(self, key):
+        with open(self._path_for_key(key), "r") as f:
+            result = json.load(f)
+        return result[key]
+
+    def __contains__(self, key):
+        return os.path.exists(self._path_for_key(key))
+
+    def __setitem__(self, key, value):
+        temporary_path = self._path_for_key(key) + "." + uuid.uuid4().hex[:10]
+        with open(temporary_path, "w") as f:
+            json.dump({key: value}, f)
+        os.rename(temporary_path, self._path_for_key(key))
+
+    def __delitem__(self, key):
+        os.remove(self._path_for_key(key))
+
+    def items(self):
+        for filename in os.listdir(self.path):
+            with open(os.path.join(self.path, filename), "r") as f:
+                yield json.load(f)
+
+    def __enter__(self):
+        if self.multi_process_safe:
+            self.lock.__enter__()
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        if self.multi_process_safe:
+            self.lock.__exit__(*args, **kwargs)
+
+    def close(self):
+        self.__exit__()

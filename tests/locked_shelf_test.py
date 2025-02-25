@@ -1,8 +1,11 @@
+import json
+import os
 import random
 import shutil
 import unittest
 
-from permacache.locked_shelf import LockedShelf
+from permacache.hash import stable_hash
+from permacache.locked_shelf import IndividualFileLockedStore, LockedShelf
 
 
 class LockedShelfTest(unittest.TestCase):
@@ -46,7 +49,37 @@ class LockedShelfTest(unittest.TestCase):
                     else:
                         self.assertFalse(k in s)
 
+    def test_large_key(self):
+        with self.shelf as s:
+            s["a" * 100] = "b"
+            self.assertEqual(s["a" * 100], "b")
+            self.assertTrue("a" * 100 in s)
+            self.assertFalse(stable_hash("a" * 100)[:20] in s)
+
 
 class LockedShelfTestLargeObjects(LockedShelfTest):
     def setUp(self):
         self.shelf = LockedShelf("temp/tempshelf", allow_large_values=True)
+
+
+class IndividualFileLockedStoreTest(LockedShelfTest):
+    def setUp(self):
+        self.shelf = IndividualFileLockedStore("temp/tempshelf")
+
+    def test_put_and_access(self):
+        super().test_put_and_access()
+        self.assertEqual(os.listdir("temp/tempshelf"), [".a"])
+        with open("temp/tempshelf/.a") as f:
+            self.assertEqual(json.load(f), {"a": "b"})
+
+    def test_several_accesses(self):
+        super().test_several_accesses()
+        for p in os.listdir("temp/tempshelf"):
+            self.assertIn(p, [f".{x}" for x in range(100)])
+
+    def test_large_key(self):
+        super().test_large_key()
+        h = stable_hash("a" * 100)[:20]
+        self.assertEqual(os.listdir("temp/tempshelf"), [h])
+        with open("temp/tempshelf/" + h) as f:
+            self.assertEqual(json.load(f), {"a" * 100: "b"})
