@@ -117,13 +117,11 @@ def best_effort_to_bytes(obj):
 
 
 def stringify(obj, *, fast_bytes=False):
-    u = json.dumps(
+    return json.dumps(
         fix_dictionary(obj),
         cls=FastTensorEncoder if fast_bytes else TensorEncoder,
         sort_keys=True,
     )
-    print(u)
-    return u
 
 
 def stable_hash(obj, *, fast_bytes=True):
