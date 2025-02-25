@@ -70,7 +70,7 @@ class LockedShelfTestLargeObjects(LockedShelfTest):
 
 class IndividualFileLockedStoreTest(LockedShelfTest):
     def setUp(self):
-        self.shelf = IndividualFileLockedStore("temp/tempshelf")
+        self.shelf = IndividualFileLockedStore("temp/tempshelf", driver="json")
 
     def test_put_and_access(self):
         super().test_put_and_access()
@@ -102,7 +102,7 @@ class IndividualFileLockedStoreTest(LockedShelfTest):
 
 class IndividualFileLockedStoreTestPickle(LockedShelfTest):
     def setUp(self):
-        self.shelf = IndividualFileLockedStore("temp/tempshelf", driver="pickle")
+        self.shelf = IndividualFileLockedStore("temp/tempshelf")
 
     def test_put_and_access(self):
         super().test_put_and_access()

@@ -165,7 +165,7 @@ class IndividualFileLockedStore:
         self,
         path,
         multiprocess_safe=False,
-        driver="json",
+        driver="pickle",
     ):
         try:
             os.makedirs(path)

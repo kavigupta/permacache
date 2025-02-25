@@ -65,9 +65,7 @@ class PermacacheTest(unittest.TestCase):
 class PermacacheIndividualTest(PermacacheTest):
 
     def create_cache_fn(self):
-        return cache.permacache("func", shelf_type="individual-file", driver="pickle")(
-            fn
-        )
+        return cache.permacache("func", shelf_type="individual-file")(fn)
 
 
 class PermacacheIndividualTestLocal(PermacacheTest):
@@ -76,11 +74,7 @@ class PermacacheIndividualTestLocal(PermacacheTest):
         self.local_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "test_cache", "func"
         )
-        return cache.permacache(
-            self.local_path,
-            shelf_type="individual-file",
-            driver="pickle",
-        )(fn)
+        return cache.permacache(self.local_path, shelf_type="individual-file")(fn)
 
     def test_basic(self):
         super().test_basic()
