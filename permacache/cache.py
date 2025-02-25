@@ -17,18 +17,32 @@ from permacache.out_file_cache import (
 from .cache_miss_error import CacheMissError, error_on_miss, error_on_miss_global
 from .dict_function import dict_function, parallel_output
 from .hash import stringify
-from .locked_shelf import LockedShelf
+from .locked_shelf import IndividualFileLockedStore, LockedShelf
 from .utils import bind_arguments
 
 CACHE = user_cache_dir("permacache")
 
 
 class CachedFunction:
-    def __init__(self, function, key_function, path, *, parallel, **kwargs):
+    def __init__(
+        self,
+        function,
+        key_function,
+        path,
+        *,
+        parallel,
+        shelf_type="combined-file",
+        **kwargs,
+    ):
         self.function = function
         self.key_function = key_function
         self.parallel = parallel
-        self.shelf = LockedShelf(path, **kwargs)
+        if shelf_type == "combined-file":
+            self.shelf = LockedShelf(path, **kwargs)
+        elif shelf_type == "individual-file":
+            self.shelf = IndividualFileLockedStore(path, **kwargs)
+        else:
+            raise ValueError(f"Unknown shelf type {shelf_type}")
         self._error_on_miss = False
 
     def _run_underlying(self, *args, **kwargs):

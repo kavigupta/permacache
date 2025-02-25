@@ -1,7 +1,10 @@
+import os
+import shutil
 import tempfile
 import unittest
 
 from permacache import cache, no_cache_global
+from permacache.hash import stable_hash
 from permacache.swap_unpickler import (
     renamed_symbol_unpickler,
     swap_unpickler_context_manager,
@@ -19,13 +22,17 @@ def fn(x, y=2, z=3, *args):
 
 
 class PermacacheTest(unittest.TestCase):
+
+    def create_cache_fn(self):
+        return cache.permacache("func")(fn)
+
     def setUp(self):
         # we clean this up in tearDown
         # pylint: disable=consider-using-with
         self.dir = tempfile.TemporaryDirectory()
         cache.CACHE = self.dir.name
         fn.counter = 0
-        self.f = cache.permacache("func")(fn)
+        self.f = self.create_cache_fn()
 
     def tearDown(self):
         del self.f
@@ -53,6 +60,45 @@ class PermacacheTest(unittest.TestCase):
         with no_cache_global():
             self.assertEqual(self.f(1, 2, 3), (1, 2, 3, ()))
         self.assertEqual(fn.counter, 2)
+
+
+class PermacacheIndividualTest(PermacacheTest):
+
+    def create_cache_fn(self):
+        return cache.permacache("func", shelf_type="individual-file")(fn)
+
+
+class PermacacheIndividualTestLocal(PermacacheTest):
+
+    def create_cache_fn(self):
+        self.local_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "test_cache", "func"
+        )
+        return cache.permacache(self.local_path, shelf_type="individual-file")(fn)
+
+    def test_basic(self):
+        super().test_basic()
+        self.assertTrue(os.path.exists(self.local_path))
+        self.assertEqual(
+            set(
+                os.path.join(directory, filename)
+                for directory, _, filenames in os.walk(self.local_path)
+                for filename in filenames
+            ),
+            set(
+                os.path.join(self.local_path, x)
+                for x in [
+                    stable_hash('{"args": [], "x": 1, "y": 2, "z": 3}')[:20] + ".pkl",
+                    stable_hash('{"args": [], "x": 3, "y": 2, "z": 1}')[:20] + ".pkl",
+                    stable_hash('{"args": [0, -1], "x": 3, "y": 2, "z": 1}')[:20]
+                    + ".pkl",
+                ]
+            ),
+        )
+
+    def tearDown(self):
+        shutil.rmtree(self.local_path)
+        return super().tearDown()
 
 
 def g(x):
