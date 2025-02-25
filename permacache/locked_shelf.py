@@ -1,5 +1,6 @@
 import json
 import os
+import pickle
 import shelve
 import time
 import uuid
@@ -161,7 +162,11 @@ class IndividualFileLockedStore:
     """
 
     def __init__(
-        self, path, read_from_shelf_context_manager=None, multiprocess_safe=False
+        self,
+        path,
+        read_from_shelf_context_manager=None,
+        multiprocess_safe=False,
+        driver="json",
     ):
         try:
             os.makedirs(path)
@@ -172,16 +177,26 @@ class IndividualFileLockedStore:
         self.cache = None
         self.read_from_shelf_context_manager = read_from_shelf_context_manager
         self.multi_process_safe = multiprocess_safe
+        assert driver in ("json", "pickle"), "driver must be json or pickle"
+        self.driver = driver
 
     def _path_for_key(self, key):
         if len(key) < 40 and all(c.isalnum() or c in "-_.,[](){} " for c in key):
-            return os.path.join(self.path, "." + key)
-        key = stable_hash(key)[:20]
+            key = "." + key
+        else:
+            key = stable_hash(key)[:20]
+        key = key + {"json": ".json", "pickle": ".pkl"}[self.driver]
         return os.path.join(self.path, key)
 
     def __getitem__(self, key):
-        with open(self._path_for_key(key), "r") as f:
-            result = json.load(f)
+        if self.driver == "json":
+            with open(self._path_for_key(key), "r") as f:
+                result = json.load(f)
+        elif self.driver == "pickle":
+            with open(self._path_for_key(key), "rb") as f:
+                result = pickle.load(f)
+        else:
+            raise ValueError(f"Unknown driver {self.driver}")
         return result[key]
 
     def __contains__(self, key):
@@ -189,8 +204,16 @@ class IndividualFileLockedStore:
 
     def __setitem__(self, key, value):
         temporary_path = self._path_for_key(key) + "." + uuid.uuid4().hex[:10]
-        with open(temporary_path, "w") as f:
-            json.dump({key: value}, f)
+        if self.driver == "json":
+            out = json.dumps({key: value})
+            with open(temporary_path, "w") as f:
+                f.write(out)
+        elif self.driver == "pickle":
+            out = pickle.dumps({key: value})
+            with open(temporary_path, "wb") as f:
+                f.write(out)
+        else:
+            raise ValueError(f"Unknown driver {self.driver}")
         os.replace(temporary_path, self._path_for_key(key))
 
     def __delitem__(self, key):
@@ -198,8 +221,15 @@ class IndividualFileLockedStore:
 
     def items(self):
         for filename in os.listdir(self.path):
-            with open(os.path.join(self.path, filename), "r") as f:
-                yield from json.load(f).items()
+            if self.driver == "json":
+                with open(os.path.join(self.path, filename), "r") as f:
+                    item = json.load(f)
+            elif self.driver == "pickle":
+                with open(os.path.join(self.path, filename), "rb") as f:
+                    item = pickle.load(f)
+            else:
+                raise ValueError(f"Unknown driver {self.driver}")
+            yield from item.items()
 
     def __enter__(self):
         if self.multi_process_safe:
