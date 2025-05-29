@@ -4,6 +4,7 @@ import pickle
 import shelve
 import time
 import uuid
+import weakref
 
 from filelock import FileLock
 
@@ -52,6 +53,9 @@ class Lock:
 
     def _check(self):
         assert self.unlocked, "can only perform this operation on an unlocked lock"
+
+
+all_locked_shelves = weakref.WeakValueDictionary()
 
 
 class LockedShelf:
@@ -144,14 +148,18 @@ class LockedShelf:
     def __exit__(self, *args, **kwargs):
         if self.multiprocess_safe:
             # for multi-processing safety, the only way is to close the shelf every time
-            if self.shelf is not None:
-                self.shelf.close()
-            self.shelf = None
+            self.close()
         self.lock.__exit__(*args, **kwargs)
+
+    def sync(self):
+        all_locked_shelves[self.path] = self
+        if self.shelf is not None:
+            self.shelf.sync()
 
     def close(self):
         if self.shelf is not None:
             self.shelf.close()
+            self.shelf = None
 
 
 class IndividualFileLockedStore:
@@ -240,3 +248,20 @@ class IndividualFileLockedStore:
 
     def close(self):
         self.__exit__()
+
+
+def sync_all_caches():
+    """
+    Sync all locked shelves that are currently open.
+    """
+    for shelf in all_locked_shelves.values():
+        shelf.sync()
+
+
+def close_all_caches():
+    """
+    Close all locked shelves that are currently open.
+    """
+    for shelf in all_locked_shelves.values():
+        shelf.close()
+    all_locked_shelves.clear()
