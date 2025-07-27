@@ -1,3 +1,4 @@
+import gzip
 import json
 import os
 import pickle
@@ -183,7 +184,11 @@ class IndividualFileLockedStore:
         self.lock = Lock(self.path + "/lock", self.path + "/time")
         self.cache = None
         self.multi_process_safe = multiprocess_safe
-        assert driver in ("json", "pickle"), "driver must be json or pickle"
+        assert driver in (
+            "json",
+            "pickle",
+            "pickle.gz",
+        ), "driver must be json or pickle"
         self.driver = driver
 
     def _path_for_key(self, key):
@@ -191,7 +196,10 @@ class IndividualFileLockedStore:
             key = "." + key
         else:
             key = stable_hash(key)[:20]
-        key = key + {"json": ".json", "pickle": ".pkl"}[self.driver]
+        key = (
+            key
+            + {"json": ".json", "pickle": ".pkl", "pickle.gz": ".pkl.gz"}[self.driver]
+        )
         return os.path.join(self.path, key)
 
     def __getitem__(self, key):
@@ -200,6 +208,9 @@ class IndividualFileLockedStore:
                 result = json.load(f)
         elif self.driver == "pickle":
             with open(self._path_for_key(key), "rb") as f:
+                result = pickle.load(f)
+        elif self.driver == "pickle.gz":
+            with gzip.open(self._path_for_key(key), "rb") as f:
                 result = pickle.load(f)
         else:
             raise ValueError(f"Unknown driver {self.driver}")
@@ -218,6 +229,10 @@ class IndividualFileLockedStore:
             out = pickle.dumps({key: value})
             with open(temporary_path, "wb") as f:
                 f.write(out)
+        elif self.driver == "pickle.gz":
+            out = pickle.dumps({key: value})
+            with gzip.GzipFile(temporary_path, "wb", mtime=0) as f:
+                f.write(out)
         else:
             raise ValueError(f"Unknown driver {self.driver}")
         os.replace(temporary_path, self._path_for_key(key))
@@ -232,6 +247,9 @@ class IndividualFileLockedStore:
                     item = json.load(f)
             elif self.driver == "pickle":
                 with open(os.path.join(self.path, filename), "rb") as f:
+                    item = pickle.load(f)
+            elif self.driver == "pickle.gz":
+                with gzip.open(os.path.join(self.path, filename), "rb") as f:
                     item = pickle.load(f)
             else:
                 raise ValueError(f"Unknown driver {self.driver}")
