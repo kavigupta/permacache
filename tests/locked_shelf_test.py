@@ -1,3 +1,4 @@
+import gzip
 import json
 import os
 import pickle
@@ -120,6 +121,44 @@ class IndividualFileLockedStoreTestPickle(LockedShelfTest):
         h = stable_hash("a" * 100)[:20] + ".pkl"
         self.assertEqual(os.listdir("temp/tempshelf"), [h])
         with open("temp/tempshelf/" + h, "rb") as f:
+            self.assertEqual(pickle.load(f), {"a" * 100: "b"})
+
+    def test_un_jsonable(self):
+        with self.shelf as s:
+            s["a"] = np.array([1, 2, 3])
+        with self.shelf as s:
+            self.assertEqual(type(s["a"]), np.ndarray)
+            self.assertEqual(s["a"].tolist(), [1, 2, 3])
+
+    def test_un_pickleable(self):
+        with self.assertRaises(Exception):
+            with self.shelf as s:
+                s["a"] = lambda x: x
+        with self.shelf as s:
+            self.assertFalse("a" in s)
+            self.assertEqual(list(s.items()), [])
+
+
+class IndividualFileLockedStoreTestPickleGZ(LockedShelfTest):
+    def setUp(self):
+        self.shelf = IndividualFileLockedStore("temp/tempshelf", driver="pickle.gz")
+
+    def test_put_and_access(self):
+        super().test_put_and_access()
+        self.assertEqual(os.listdir("temp/tempshelf"), [".a.pkl.gz"])
+        with gzip.open("temp/tempshelf/.a.pkl.gz", "rb") as f:
+            self.assertEqual(pickle.load(f), {"a": "b"})
+
+    def test_several_accesses(self):
+        super().test_several_accesses()
+        for p in os.listdir("temp/tempshelf"):
+            self.assertIn(p, [f".{x}.pkl.gz" for x in range(100)])
+
+    def test_large_key(self):
+        super().test_large_key()
+        h = stable_hash("a" * 100)[:20] + ".pkl.gz"
+        self.assertEqual(os.listdir("temp/tempshelf"), [h])
+        with gzip.open("temp/tempshelf/" + h, "rb") as f:
             self.assertEqual(pickle.load(f), {"a" * 100: "b"})
 
     def test_un_jsonable(self):
