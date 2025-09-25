@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch
 
 from permacache import cache
-from permacache.locked_shelf import sync_all_caches
+from permacache.locked_shelf import sync_all_caches, close_all_caches
 from permacache.main import count_keys_in_cache, do_count
 
 
@@ -24,8 +24,14 @@ class CountTest(unittest.TestCase):
         fn.counter = 0
 
     def tearDown(self):
+        close_all_caches()
         cache.CACHE = self.original_cache
         self.temp_dir.cleanup()
+
+    def _flush_caches(self):
+        """Flush all caches to disk before counting."""
+        sync_all_caches()
+        close_all_caches()
 
     def test_count_combined_file_cache(self):
         """Test counting keys in a combined-file cache."""
@@ -37,7 +43,7 @@ class CountTest(unittest.TestCase):
         cached_fn(4, 5, 6)
         cached_fn(7, 8, 9)
 
-        sync_all_caches()
+        self._flush_caches()
 
         # Count the keys
         cache_path = os.path.join(cache.CACHE, "test_cache")
@@ -50,7 +56,7 @@ class CountTest(unittest.TestCase):
         # Create a cached function but don't call it
         cache.permacache("empty_cache")(fn)
 
-        sync_all_caches()
+        self._flush_caches()
 
         # Count the keys
         cache_path = os.path.join(cache.CACHE, "empty_cache")
@@ -74,7 +80,7 @@ class CountTest(unittest.TestCase):
         cached_fn(1, 2, 3)
         cached_fn(4, 5, 6)
 
-        sync_all_caches()
+        self._flush_caches()
 
         # Mock args object
         class MockArgs:
@@ -102,8 +108,6 @@ class CountTest(unittest.TestCase):
         args = MockArgs()
 
         # Capture stderr and test exit code
-        sync_all_caches()
-
         captured_stderr = io.StringIO()
         with patch("sys.stderr", captured_stderr), patch("sys.exit") as mock_exit:
             do_count(args)
@@ -122,7 +126,7 @@ class CountTest(unittest.TestCase):
         cached_fn(x=10, y=20, z=30)  # keyword args
         cached_fn(100, z=300)  # mixed args
 
-        sync_all_caches()
+        self._flush_caches()
 
         # Count the keys
         cache_path = os.path.join(cache.CACHE, "mixed_keys_cache")
@@ -143,7 +147,7 @@ class CountTest(unittest.TestCase):
         # Add entries
         cached_fn(xs=[1, 2, 3], y=10, z=20)
 
-        sync_all_caches()
+        self._flush_caches()
 
         # Count the keys (should be 3 due to parallel processing)
         cache_path = os.path.join(cache.CACHE, "parallel_cache")
@@ -163,8 +167,14 @@ class CountCLITest(unittest.TestCase):
         fn.counter = 0
 
     def tearDown(self):
+        close_all_caches()
         cache.CACHE = self.original_cache
         self.temp_dir.cleanup()
+
+    def _flush_caches(self):
+        """Flush all caches to disk before counting."""
+        sync_all_caches()
+        close_all_caches()
 
     def test_count_command_help(self):
         """Test that count command shows help correctly."""
@@ -192,7 +202,7 @@ class CountCLITest(unittest.TestCase):
         cached_fn(1, 2, 3)
         cached_fn(4, 5, 6)
 
-        sync_all_caches()
+        self._flush_caches()
 
         # Mock the cache directory to use our test directory
         with patch("appdirs.user_cache_dir", return_value=cache.CACHE):
