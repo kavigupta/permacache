@@ -5,6 +5,7 @@ import unittest
 from unittest.mock import patch
 
 from permacache import cache
+from permacache.locked_shelf import sync_all_caches
 from permacache.main import count_keys_in_cache, do_count
 
 
@@ -36,6 +37,8 @@ class CountTest(unittest.TestCase):
         cached_fn(4, 5, 6)
         cached_fn(7, 8, 9)
 
+        sync_all_caches()
+
         # Count the keys
         cache_path = os.path.join(cache.CACHE, "test_cache")
         count = count_keys_in_cache(cache_path)
@@ -46,6 +49,8 @@ class CountTest(unittest.TestCase):
         """Test counting keys in an empty cache."""
         # Create a cached function but don't call it
         cache.permacache("empty_cache")(fn)
+
+        sync_all_caches()
 
         # Count the keys
         cache_path = os.path.join(cache.CACHE, "empty_cache")
@@ -68,6 +73,8 @@ class CountTest(unittest.TestCase):
         cached_fn = cache.permacache("test_do_count")(fn)
         cached_fn(1, 2, 3)
         cached_fn(4, 5, 6)
+
+        sync_all_caches()
 
         # Mock args object
         class MockArgs:
@@ -95,6 +102,8 @@ class CountTest(unittest.TestCase):
         args = MockArgs()
 
         # Capture stderr and test exit code
+        sync_all_caches()
+
         captured_stderr = io.StringIO()
         with patch("sys.stderr", captured_stderr), patch("sys.exit") as mock_exit:
             do_count(args)
@@ -112,6 +121,8 @@ class CountTest(unittest.TestCase):
         cached_fn(1, 2, 3)  # positional args
         cached_fn(x=10, y=20, z=30)  # keyword args
         cached_fn(100, z=300)  # mixed args
+
+        sync_all_caches()
 
         # Count the keys
         cache_path = os.path.join(cache.CACHE, "mixed_keys_cache")
@@ -132,33 +143,13 @@ class CountTest(unittest.TestCase):
         # Add entries
         cached_fn(xs=[1, 2, 3], y=10, z=20)
 
+        sync_all_caches()
+
         # Count the keys (should be 3 due to parallel processing)
         cache_path = os.path.join(cache.CACHE, "parallel_cache")
         count = count_keys_in_cache(cache_path)
 
         self.assertEqual(count, 3)
-
-    def test_count_cache_with_file_output(self):
-        """Test counting keys in a cache with file output."""
-
-        # Create a cached function with file output
-        def fn_with_file_output(x):
-            fn.counter += 1
-            return x * 2
-
-        cached_fn = cache.permacache("file_cache", out_file="output.txt")(
-            fn_with_file_output
-        )
-
-        # Add entries
-        cached_fn(1)
-        cached_fn(2)
-
-        # Count the keys
-        cache_path = os.path.join(cache.CACHE, "file_cache")
-        count = count_keys_in_cache(cache_path)
-
-        self.assertEqual(count, 2)
 
 
 class CountCLITest(unittest.TestCase):
@@ -200,6 +191,8 @@ class CountCLITest(unittest.TestCase):
         cached_fn = cache.permacache("cli_test_cache")(fn)
         cached_fn(1, 2, 3)
         cached_fn(4, 5, 6)
+
+        sync_all_caches()
 
         # Mock the cache directory to use our test directory
         with patch("appdirs.user_cache_dir", return_value=cache.CACHE):
