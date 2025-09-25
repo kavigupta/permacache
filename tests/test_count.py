@@ -32,6 +32,20 @@ class CountTest(unittest.TestCase):
         """Flush all caches to disk before counting."""
         sync_all_caches()
         close_all_caches()
+        
+        # Force garbage collection to ensure shelf objects are destroyed
+        import gc
+        gc.collect()
+        
+        # Additional cleanup - ensure all file locks are released
+        from permacache.locked_shelf import all_locked_shelves
+        if all_locked_shelves:
+            print(f"WARNING: {len(all_locked_shelves)} caches still open after flush!")
+            for path, shelf in list(all_locked_shelves.items()):
+                try:
+                    shelf.close()
+                except:
+                    pass
 
     def test_count_combined_file_cache(self):
         """Test counting keys in a combined-file cache."""
@@ -175,6 +189,20 @@ class CountCLITest(unittest.TestCase):
         """Flush all caches to disk before counting."""
         sync_all_caches()
         close_all_caches()
+        
+        # Force garbage collection to ensure shelf objects are destroyed
+        import gc
+        gc.collect()
+        
+        # Additional cleanup - ensure all file locks are released
+        from permacache.locked_shelf import all_locked_shelves
+        if all_locked_shelves:
+            print(f"WARNING: {len(all_locked_shelves)} caches still open after flush!")
+            for path, shelf in list(all_locked_shelves.items()):
+                try:
+                    shelf.close()
+                except:
+                    pass
 
     def test_count_command_help(self):
         """Test that count command shows help correctly."""
