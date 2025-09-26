@@ -7,7 +7,6 @@ import unittest
 from unittest.mock import patch
 
 from permacache import cache
-from permacache.locked_shelf import close_all_caches, sync_all_caches
 from permacache.main import count_keys_in_cache, do_count
 
 
@@ -37,7 +36,6 @@ class CountTest(unittest.TestCase):
         fn.counter = 0
 
     def tearDown(self):
-        close_all_caches()
         cache.CACHE = self.original_cache
         self.temp_dir.cleanup()
 
@@ -155,7 +153,6 @@ class CountCLITest(unittest.TestCase):
         fn.counter = 0
 
     def tearDown(self):
-        close_all_caches()
         cache.CACHE = self.original_cache
         self.temp_dir.cleanup()
 
