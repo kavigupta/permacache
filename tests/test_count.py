@@ -1,13 +1,13 @@
 import io
+import json
 import os
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
-import subprocess
-import json
 
 from permacache import cache
-from permacache.locked_shelf import sync_all_caches, close_all_caches
+from permacache.locked_shelf import close_all_caches, sync_all_caches
 from permacache.main import count_keys_in_cache, do_count
 
 
@@ -21,13 +21,15 @@ def populate_cache_with_subprocess(cache_dir, cache_name, calls):
     """Populate a cache using a separate Python process to avoid file lock issues."""
     # Convert calls to JSON format
     calls_json = json.dumps(calls)
-    
+
     # Run the populate_cache.py script
     script_path = os.path.join(os.path.dirname(__file__), "..", "populate_cache.py")
-    result = subprocess.run([
-        "python", script_path, cache_dir, cache_name, calls_json
-    ], capture_output=True, text=True)
-    
+    result = subprocess.run(
+        ["python", script_path, cache_dir, cache_name, calls_json],
+        capture_output=True,
+        text=True,
+    )
+
     if result.returncode != 0:
         raise RuntimeError(f"Failed to populate cache: {result.stderr}")
 
@@ -48,17 +50,13 @@ class CountTest(unittest.TestCase):
     def test_count_combined_file_cache(self):
         """Test counting keys in a combined-file cache."""
         # Populate cache using subprocess
-        calls = [
-            {"args": [1, 2, 3]},
-            {"args": [4, 5, 6]},
-            {"args": [7, 8, 9]}
-        ]
+        calls = [{"args": [1, 2, 3]}, {"args": [4, 5, 6]}, {"args": [7, 8, 9]}]
         populate_cache_with_subprocess(self.temp_dir.name, "test_cache", calls)
-        
+
         # Count the keys
         cache_path = os.path.join(cache.CACHE, "test_cache")
         count = count_keys_in_cache(cache_path)
-        
+
         self.assertEqual(count, 3)
 
     def test_count_empty_cache(self):
@@ -66,11 +64,11 @@ class CountTest(unittest.TestCase):
         # Populate cache using subprocess with no calls
         calls = []
         populate_cache_with_subprocess(self.temp_dir.name, "empty_cache", calls)
-        
+
         # Count the keys
         cache_path = os.path.join(cache.CACHE, "empty_cache")
         count = count_keys_in_cache(cache_path)
-        
+
         self.assertEqual(count, 0)
 
     def test_count_nonexistent_cache(self):
@@ -85,25 +83,22 @@ class CountTest(unittest.TestCase):
     def test_do_count_function(self):
         """Test the do_count function with proper output."""
         # Populate cache using subprocess
-        calls = [
-            {"args": [1, 2, 3]},
-            {"args": [4, 5, 6]}
-        ]
+        calls = [{"args": [1, 2, 3]}, {"args": [4, 5, 6]}]
         populate_cache_with_subprocess(self.temp_dir.name, "test_do_count", calls)
-        
+
         # Mock args object
         class MockArgs:
             cache_name = "test_do_count"
-        
+
         args = MockArgs()
-        
+
         # Mock the cache directory to use our test directory
         with patch("appdirs.user_cache_dir", return_value=cache.CACHE):
             # Capture stdout
             captured_output = io.StringIO()
             with patch("sys.stdout", captured_output):
                 do_count(args)
-            
+
             output = captured_output.getvalue()
             self.assertIn("Cache 'test_do_count' contains 2 keys", output)
 
@@ -131,28 +126,26 @@ class CountTest(unittest.TestCase):
         calls = [
             {"args": [1, 2, 3]},  # positional args
             {"kwargs": {"x": 10, "y": 20, "z": 30}},  # keyword args
-            {"args": [100], "kwargs": {"z": 300}}  # mixed args
+            {"args": [100], "kwargs": {"z": 300}},  # mixed args
         ]
         populate_cache_with_subprocess(self.temp_dir.name, "mixed_keys_cache", calls)
-        
+
         # Count the keys
         cache_path = os.path.join(cache.CACHE, "mixed_keys_cache")
         count = count_keys_in_cache(cache_path)
-        
+
         self.assertEqual(count, 3)
 
     def test_count_with_parallel_cache(self):
         """Test counting keys in a cache with parallel processing."""
         # Populate cache using subprocess with parallel processing
-        calls = [
-            {"parallel": {"xs": [1, 2, 3], "y": 10, "z": 20}}
-        ]
+        calls = [{"parallel": {"xs": [1, 2, 3], "y": 10, "z": 20}}]
         populate_cache_with_subprocess(self.temp_dir.name, "parallel_cache", calls)
-        
+
         # Count the keys (should be 3 due to parallel processing)
         cache_path = os.path.join(cache.CACHE, "parallel_cache")
         count = count_keys_in_cache(cache_path)
-        
+
         self.assertEqual(count, 3)
 
 
@@ -175,13 +168,15 @@ class CountCLITest(unittest.TestCase):
         """Flush all caches to disk before counting."""
         sync_all_caches()
         close_all_caches()
-        
+
         # Force garbage collection to ensure shelf objects are destroyed
         import gc
+
         gc.collect()
-        
+
         # Additional cleanup - ensure all file locks are released
         from permacache.locked_shelf import all_locked_shelves
+
         if all_locked_shelves:
             print(f"WARNING: {len(all_locked_shelves)} caches still open after flush!")
             for path, shelf in list(all_locked_shelves.items()):
@@ -212,10 +207,7 @@ class CountCLITest(unittest.TestCase):
         from permacache.main import main
 
         # Populate cache using subprocess
-        calls = [
-            {"args": [1, 2, 3]},
-            {"args": [4, 5, 6]}
-        ]
+        calls = [{"args": [1, 2, 3]}, {"args": [4, 5, 6]}]
         populate_cache_with_subprocess(self.temp_dir.name, "cli_test_cache", calls)
 
         # Mock the cache directory to use our test directory
@@ -226,7 +218,7 @@ class CountCLITest(unittest.TestCase):
                 "sys.argv", ["permacache", "count", "cli_test_cache"]
             ):
                 main()
-            
+
             output = captured_output.getvalue()
             self.assertIn("Cache 'cli_test_cache' contains 2 keys", output)
 
