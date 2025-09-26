@@ -32,7 +32,7 @@ def main():
     cache_args(export_parser)
     export_parser.set_defaults(fn=do_export)
     import_parser = subparsers.add_parser(
-        "import", help="Export a cache to a file", aliases=["i"]
+        "import", help="Import a cache from a file", aliases=["i"]
     )
     cache_args(import_parser)
     import_parser.set_defaults(fn=do_import)
