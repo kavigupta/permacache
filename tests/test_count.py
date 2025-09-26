@@ -24,11 +24,8 @@ def populate_cache_with_subprocess(cache_dir, cache_name, calls):
 
     # Run the populate_cache.py script
     script_path = os.path.join(os.path.dirname(__file__), "..", "populate_cache.py")
-    subprocess.check_call(
-        ["python", script_path, cache_dir, cache_name, calls_json],
-        capture_output=True,
-        text=True,
-    )
+    subprocess.check_call(["python", script_path, cache_dir, cache_name, calls_json])
+
 
 class CountTest(unittest.TestCase):
     def setUp(self):
@@ -43,7 +40,6 @@ class CountTest(unittest.TestCase):
         close_all_caches()
         cache.CACHE = self.original_cache
         self.temp_dir.cleanup()
-
 
     def test_count_combined_file_cache(self):
         """Test counting keys in a combined-file cache."""
