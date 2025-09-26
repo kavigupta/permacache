@@ -159,28 +159,6 @@ class CountCLITest(unittest.TestCase):
         cache.CACHE = self.original_cache
         self.temp_dir.cleanup()
 
-    def _flush_caches(self):
-        """Flush all caches to disk before counting."""
-        # pylint: disable=bare-except
-        sync_all_caches()
-        close_all_caches()
-
-        # Force garbage collection to ensure shelf objects are destroyed
-        import gc
-
-        gc.collect()
-
-        # Additional cleanup - ensure all file locks are released
-        from permacache.locked_shelf import all_locked_shelves
-
-        if all_locked_shelves:
-            print(f"WARNING: {len(all_locked_shelves)} caches still open after flush!")
-            for _, shelf in list(all_locked_shelves.items()):
-                try:
-                    shelf.close()
-                except:
-                    pass
-
     def test_count_command_help(self):
         """Test that count command shows help correctly."""
         from permacache.main import main
