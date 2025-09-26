@@ -24,18 +24,15 @@ def populate_cache_with_subprocess(cache_dir, cache_name, calls):
 
     # Run the populate_cache.py script
     script_path = os.path.join(os.path.dirname(__file__), "..", "populate_cache.py")
-    result = subprocess.run(
+    subprocess.check_call(
         ["python", script_path, cache_dir, cache_name, calls_json],
         capture_output=True,
         text=True,
     )
 
-    if result.returncode != 0:
-        raise RuntimeError(f"Failed to populate cache: {result.stderr}")
-
-
 class CountTest(unittest.TestCase):
     def setUp(self):
+        # pylint: disable=consider-using-with
         # Create a temporary directory for cache
         self.temp_dir = tempfile.TemporaryDirectory()
         self.original_cache = cache.CACHE
@@ -46,6 +43,7 @@ class CountTest(unittest.TestCase):
         close_all_caches()
         cache.CACHE = self.original_cache
         self.temp_dir.cleanup()
+
 
     def test_count_combined_file_cache(self):
         """Test counting keys in a combined-file cache."""
@@ -153,6 +151,7 @@ class CountCLITest(unittest.TestCase):
     """Test the CLI interface for the count command."""
 
     def setUp(self):
+        # pylint: disable=consider-using-with
         # Create a temporary directory for cache
         self.temp_dir = tempfile.TemporaryDirectory()
         self.original_cache = cache.CACHE
@@ -166,6 +165,7 @@ class CountCLITest(unittest.TestCase):
 
     def _flush_caches(self):
         """Flush all caches to disk before counting."""
+        # pylint: disable=bare-except
         sync_all_caches()
         close_all_caches()
 
@@ -179,7 +179,7 @@ class CountCLITest(unittest.TestCase):
 
         if all_locked_shelves:
             print(f"WARNING: {len(all_locked_shelves)} caches still open after flush!")
-            for path, shelf in list(all_locked_shelves.items()):
+            for _, shelf in list(all_locked_shelves.items()):
                 try:
                     shelf.close()
                 except:
