@@ -73,7 +73,7 @@ def do_copy_file(file_cache, out_path):
         try:
             good = os.stat(path).st_mtime_ns == file_cache[path]
             if good:
-                file_cache_valid[path] = file_cache[path]
+                file_cache_valid[os.path.abspath(path)] = file_cache[path]
         except FileNotFoundError:
             pass
     if out_path in file_cache_valid:
