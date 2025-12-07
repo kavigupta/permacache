@@ -112,7 +112,7 @@ class CachedFunction:
         with self.shelf as db:
             for k, v in zip(keys_for_indices, values_for_indices):
                 db[k] = v
-            return [db[k] for k in keys]
+            return db.get_multiple(keys)
 
 
 class FileCachedFunction(CachedFunction):
