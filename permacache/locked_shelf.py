@@ -113,7 +113,9 @@ class LockedShelf:
 
     def __getitem__(self, key):
         self._update()
+        return self._get_without_checking(key)
 
+    def _get_without_checking(self, key):
         if key not in self.cache:
             result = self.cache[key] = self._read_from_underlying_shelf(key)
             return result
@@ -161,6 +163,10 @@ class LockedShelf:
         if self.shelf is not None:
             self.shelf.close()
             self.shelf = None
+
+    def get_multiple(self, keys):
+        self._update()
+        return [self._get_without_checking(key) for key in keys]
 
 
 class IndividualFileLockedStore:
@@ -266,6 +272,9 @@ class IndividualFileLockedStore:
 
     def close(self):
         self.__exit__()
+
+    def get_multiple(self, keys):
+        return [self[key] for key in keys]
 
 
 def sync_all_caches():
