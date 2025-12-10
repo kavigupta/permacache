@@ -9,7 +9,9 @@ valid_versions = [None, 1]
 
 def make_json_encoder(fast_bytes, version):
     if version not in valid_versions:
-        raise ValueError(f"stringify/stable_hash version must be one of {valid_versions}")
+        raise ValueError(
+            f"stringify/stable_hash version must be one of {valid_versions}"
+        )
 
     class TensorEncoder(json.JSONEncoder):
 
