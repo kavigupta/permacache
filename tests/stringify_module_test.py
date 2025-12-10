@@ -71,9 +71,8 @@ class StringifyModuleTest(unittest.TestCase):
         a2_2 = construct_with_seed(lambda: A(2), 2)
         a3 = construct_with_seed(lambda: A(3), 1)
         b = construct_with_seed(B, 1)
-        # with self.assertWarns(DeprecationWarning):
         ctx = (
-            self.assertWarns(DeprecationWarning)
+            self.assertWarns(FutureWarning)
             if version is None
             else contextlib.nullcontext()
         )
@@ -116,35 +115,35 @@ class StringifyModuleTest(unittest.TestCase):
         c2 = construct_with_seed(lambda: C(2), 1)
         self.assertEqual(
             stable_hash(a2, version=version),
-            "f7de7326df407c1119472c468eae7964922f267da301c9419baeb59d7094a9cd",
+            "084d34856445ed411c91b0d27c3e2405d3f2a48178739ca5efa979bbe03e69b2",
         )
         self.assertEqual(
             stable_hash(a2_2, version=version),
-            "3b17039cffed242d422614b27db0b4bbb0c8d2ed2c489d4fd7485a9c53fd93dc",
+            "e990be249dc5fcdc7fbe78d65b631cd18bc24f5127984fa359110374d224e6b0",
         )
         self.assertEqual(
             stable_hash(a3, version=version),
-            "66a331418a5d0673dbe8ebcf020baf18b3c42498b46597ed9261f6082239881d",
+            "24e0a3d5335e394ff9a1e933b9e7302b5dd2c34c571baf360aaaa5da02fb7f99",
         )
         self.assertEqual(
             stable_hash(b, version=version),
-            "393a568be899bcd47becca86923703a9de3db2d83d6367242571d6b802484e90",
+            "16df7d27339b6fc8665a1319870c5fccb87e34c35523afb591709ed8821a2f59",
         )
         self.assertEqual(
             stable_hash(Container(a2), version=version),
-            "adb943bbbf513b12e958976bfb2b400ef4a7f2fe7debb45d424b5b09b27086c5",
+            "52c93a8d4c98c1a409eb16c4364474c34c512e881b12546fa22acd2fb908f165",
         )
         self.assertEqual(
             stable_hash(Container(a3), version=version),
-            "a5c4ff1d253358aca309d9a7d85c2e65375a2d57430c4fd5f06979c6ae11538d",
+            "a17cac5329e120feda1025947199dc28f3927ae9e8cb86797d200483980ac3a8",
         )
         self.assertEqual(
             stable_hash(Container(b), version=version),
-            "273817633d4d59481b8ed87c6579cd8a2e91ff44935e6fe6e3394da28bce6d19",
+            "af36fa8427d29013da1e6634ec66dcf250a29a0f737c06c843c18c5696380b04",
         )
         self.assertEqual(
             stable_hash(Container(c2), version=version),
-            "da340c73bb161e048c7e55c072b5a712f1c2c55963f8f20eb695a2859be35858",
+            "6ee17c5792eb1d52719f9e0f85102ed5c1255a9bb23dd68df14f38b07024e120",
         )
         self.assertEqual(
             len(
@@ -163,5 +162,5 @@ class StringifyModuleTest(unittest.TestCase):
         )
         self.assertEqual(
             stable_hash(Container(a2_2), version=version),
-            "318ddd93712275a4120b3f993346a760e1dcdca07f18c456bc0a9b661ed0046e",
+            "9a032bb2785dcd1489991851936214bc77047c2b09873489bf0e19252246e1b5",
         )
