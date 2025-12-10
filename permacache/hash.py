@@ -2,8 +2,8 @@ import enum
 import hashlib
 import json
 import numbers
-from types import SimpleNamespace
 import warnings
+from types import SimpleNamespace
 
 valid_versions = [None, 1, 2]
 

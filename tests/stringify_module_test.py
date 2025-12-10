@@ -1,15 +1,14 @@
 import contextlib
 import sys
 import unittest
+import warnings
 
 import numpy as np
 import torch
-from parameterized import parameterized_class, parameterized
+from parameterized import parameterized, parameterized_class
 from torch import nn
 
 from permacache import stable_hash
-import warnings
-
 from permacache.hash import valid_versions
 
 NUMPY_VERSION = np.version.version.split(".", maxsplit=1)[0]
