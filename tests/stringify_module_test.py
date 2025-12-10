@@ -42,7 +42,7 @@ class Container(nn.Module):
 # we just do this for one version of numpy and for linux. cross-platform and cross-numpy-version
 # tests are in stringify_test.py
 
-seeds = [1] if sys.platform == "linux" and NUMPY_VERSION == "2" else []
+abc = [1] if sys.platform == "linux" and NUMPY_VERSION == "2" else []
 
 
 def construct_with_seed(constructor, seed):
@@ -50,17 +50,21 @@ def construct_with_seed(constructor, seed):
     return constructor()
 
 
-@parameterized_class([{"seed": s} for s in seeds])
+@parameterized_class([{"abc": s} for s in abc])
 class StringifyModuleTest(unittest.TestCase):
-    seed: int
 
     def test_module_legacy_hash_regression_test(self):
-        a2 = construct_with_seed(lambda: A(2), self.seed)
-        a3 = construct_with_seed(lambda: A(3), self.seed)
-        b = construct_with_seed(B, self.seed)
+        a2 = construct_with_seed(lambda: A(2), 1)
+        a2_2 = construct_with_seed(lambda: A(2), 2)
+        a3 = construct_with_seed(lambda: A(3), 1)
+        b = construct_with_seed(B, 1)
         self.assertEqual(
             stable_hash(a2),
             "b4cf9ada8cfcce89dffaece16ac1934874ddf1046f59adc3c46bdb5fe249212d",
+        )
+        self.assertEqual(
+            stable_hash(a2_2),
+            "1f83444d2c69e9232240593cd5d4eaf956406df71cf8bc303309f80c1e1c11e0",
         )
         self.assertEqual(
             stable_hash(a3),
@@ -74,3 +78,7 @@ class StringifyModuleTest(unittest.TestCase):
         self.assertEqual(stable_hash(Container(a2)), common_hash)
         self.assertEqual(stable_hash(Container(a3)), common_hash)
         self.assertEqual(stable_hash(Container(b)), common_hash)
+        self.assertEqual(
+            stable_hash(Container(a2_2)),
+            "c7b97db9fa42363efa644b809391e2b2b086b2e4d6a820e56e29cd5b33c9f3f2",
+        )
