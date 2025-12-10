@@ -1,7 +1,6 @@
 import contextlib
 import sys
 import unittest
-import warnings
 
 import numpy as np
 import torch
