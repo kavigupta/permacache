@@ -5,14 +5,18 @@ import unittest
 import numpy as np
 import pandas as pd
 import torch
+from parameterized import parameterized_class
 
 from permacache import stable_hash, stringify
+from permacache.hash import valid_versions
 from tests.test_module.c import A, B, C, D
 
 NUMPY_VERSION = np.version.version.split(".", maxsplit=1)[0]
 
 
+@parameterized_class([{"version": v} for v in valid_versions])
 class StringifyTest(unittest.TestCase):
+    version: int
     data = np.random.RandomState(0).randn(1000)
     slow_hash = {
         "linux": "16469cff96525e3e190758d793e61f9d798cb87617787bc1312cf7a8b59aa4b2",
@@ -32,54 +36,56 @@ class StringifyTest(unittest.TestCase):
     }[sys.platform]
 
     def test_stringify_json(self):
-        self.assertEqual("2", stringify(2))
-        self.assertEqual("[2, 3]", stringify([2, 3]))
-        self.assertEqual('{"a": 3}', stringify({"a": 3}))
+        self.assertEqual("2", stringify(2, version=self.version))
+        self.assertEqual("[2, 3]", stringify([2, 3], version=self.version))
+        self.assertEqual('{"a": 3}', stringify({"a": 3}, version=self.version))
 
     def test_stringify_attrs(self):
         self.assertEqual(
             json.dumps({".attr.__name__": "A", "x": 1, "y": "hello", "z": 3.2}),
-            stringify(A(1, "hello", 3.2)),
+            stringify(A(1, "hello", 3.2), version=self.version),
         )
 
     def test_stringify_attr_dataclass(self):
         self.assertEqual(
             json.dumps({".attr.__name__": "B", "x": 1, "y": "hello", "z": 3.2}),
-            stringify(B(1, "hello", 3.2)),
+            stringify(B(1, "hello", 3.2), version=self.version),
         )
 
     def test_stringify_dataclass(self):
         self.assertEqual(
             json.dumps({".dataclass.__name__": "C", "x": 1, "y": "hello", "z": 3.2}),
-            stringify(C(1, "hello", 3.2)),
+            stringify(C(1, "hello", 3.2), version=self.version),
         )
 
     def test_migrated_dataclass(self):
         self.assertEqual(
             json.dumps({".attr.__name__": "D", "x": 1, "y": "hello", "z": 3.2}),
-            stringify(D(1, "hello", 3.2)),
+            stringify(D(1, "hello", 3.2), version=self.version),
         )
 
     def test_stringify_numpy(self):
         print(self.data.tobytes())
         self.assertEqual(
             self.slow_hash,
-            stable_hash(self.data, fast_bytes=False),
+            stable_hash(self.data, fast_bytes=False, version=self.version),
         )
 
     def test_stringify_numpy_fast(self):
-        self.assertEqual(self.fast_hash, stable_hash(self.data))
+        self.assertEqual(self.fast_hash, stable_hash(self.data, version=self.version))
 
     def test_stringify_torch(self):
         self.assertEqual(
             self.slow_hash,
-            stable_hash(torch.tensor(self.data), fast_bytes=False),
+            stable_hash(
+                torch.tensor(self.data), fast_bytes=False, version=self.version
+            ),
         )
 
     def test_stringify_torch_fast(self):
         self.assertEqual(
             self.fast_hash,
-            stable_hash(torch.tensor(self.data)),
+            stable_hash(torch.tensor(self.data), version=self.version),
         )
 
     def test_stringify_pandas(self):
@@ -94,15 +100,15 @@ class StringifyTest(unittest.TestCase):
         )
         self.assertEqual(
             "56db9e9bdc460416bf38da8e7f20610a0f24e56e66220ed486e20278754bcf28",
-            stable_hash(frame),
+            stable_hash(frame, version=self.version),
         )
         frame.index = ["None", "a", "b"]
         self.assertEqual(
             "4910bc9c2474a409127d88a7ddb279b34559bae5114da65f419d4eeaa622fa97",
-            stable_hash(frame),
+            stable_hash(frame, version=self.version),
         )
         frame = frame[["bye", "nested", "hello", "hi"]]
         self.assertEqual(
             "945c95c1f21efc1185ee4e4bcf3a24263881bc16564ec89ab7bb3a5d313455cb",
-            stable_hash(frame),
+            stable_hash(frame, version=self.version),
         )
