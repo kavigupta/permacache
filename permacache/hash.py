@@ -3,8 +3,9 @@ import hashlib
 import json
 import numbers
 from types import SimpleNamespace
+import warnings
 
-valid_versions = [None, 1]
+valid_versions = [None, 1, 2]
 
 
 def make_json_encoder(fast_bytes, version):
@@ -12,6 +13,44 @@ def make_json_encoder(fast_bytes, version):
         raise ValueError(
             f"stringify/stable_hash version must be one of {valid_versions}"
         )
+
+    def encode_module_legacy(o):
+        return {
+            ".type": "Module",
+            "hash": dict(
+                other_dict={
+                    k: v for k, v in o.__dict__.items() if not k.startswith("_")
+                },
+                state_dict=o.state_dict(),
+            ),
+        }
+
+    def encode_module(o):
+        if version is None:
+            warnings.warn(
+                "Using legacy encoding for torch.nn.Module; this is dangerous as it "
+                "does not uniquely identify the module's state. "
+                "To preserve this behavior, set version=1. To use the new encoding, set version>=2.",
+                source="permacache",
+                category=DeprecationWarning,
+            )
+            return encode_module_legacy(o)
+
+        if version == 1:
+            return encode_module_legacy(o)
+        assert version >= 2, "unreachable"
+        o_contents = {
+            k: v
+            for k, v in o.__dict__.items()
+            if not (k.startswith("_") and (set(k.split("_")) & {"hook", "hooks"}))
+            and not k == "_non_persistent_buffers_set"
+        }
+        return {
+            ".type": o.__class__.__module__ + "." + o.__class__.__name__,
+            "elements": {
+                k: stable_hash(v, version=version) for k, v in o_contents.items()
+            },
+        }
 
     class TensorEncoder(json.JSONEncoder):
 
@@ -50,15 +89,7 @@ def make_json_encoder(fast_bytes, version):
             if isinstance(o, type):
                 o = {".type": "type", "name": o.__module__ + "." + o.__qualname__}
             if self.isinstance_str(o, "Module"):
-                o = {
-                    ".type": "Module",
-                    "hash": dict(
-                        other_dict={
-                            k: v for k, v in o.__dict__.items() if not k.startswith("_")
-                        },
-                        state_dict=o.state_dict(),
-                    ),
-                }
+                o = encode_module(o)
             if self.isinstance_str(o, "DataFrame"):
                 return {
                     ".type": "pandas.DataFrame",
