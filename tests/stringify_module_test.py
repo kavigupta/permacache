@@ -71,9 +71,8 @@ class StringifyModuleTest(unittest.TestCase):
         a2_2 = construct_with_seed(lambda: A(2), 2)
         a3 = construct_with_seed(lambda: A(3), 1)
         b = construct_with_seed(B, 1)
-        # with self.assertWarns(DeprecationWarning):
         ctx = (
-            self.assertWarns(DeprecationWarning)
+            self.assertWarns(FutureWarning)
             if version is None
             else contextlib.nullcontext()
         )

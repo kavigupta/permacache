@@ -32,7 +32,7 @@ def make_json_encoder(fast_bytes, version):
                 "does not uniquely identify the module's state. "
                 "To preserve this behavior, set version=1. To use the new encoding, set version>=2.",
                 source="permacache",
-                category=DeprecationWarning,
+                category=FutureWarning,
             )
             return encode_module_legacy(o)
 
@@ -45,11 +45,11 @@ def make_json_encoder(fast_bytes, version):
             if not (k.startswith("_") and (set(k.split("_")) & {"hook", "hooks"}))
             and not k == "_non_persistent_buffers_set"
         }
+        o_contents = {k: stable_hash(v, version=version) for k, v in o_contents.items()}
+        o_contents = sorted(o_contents.items())
         return {
             ".type": o.__class__.__module__ + "." + o.__class__.__name__,
-            "elements": {
-                k: stable_hash(v, version=version) for k, v in o_contents.items()
-            },
+            "elements": o_contents,
         }
 
     class TensorEncoder(json.JSONEncoder):
