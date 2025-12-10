@@ -32,6 +32,7 @@ class CachedFunction:
         *,
         parallel,
         shelf_type="combined-file",
+        stringify_version=None,
         **kwargs,
     ):
         self.function = function
@@ -44,6 +45,7 @@ class CachedFunction:
         else:
             raise ValueError(f"Unknown shelf type {shelf_type}")
         self._error_on_miss = False
+        self.stringify_version = stringify_version
 
     def _run_underlying(self, *args, **kwargs):
         if self._error_on_miss or error_on_miss_global.error_on_miss:
@@ -61,7 +63,7 @@ class CachedFunction:
         if isinstance(key, parallel_output):
             return self.call_parallel(key.values, args, kwargs)
 
-        key = stringify(key)
+        key = stringify(key, version=self.stringify_version)
 
         with self.shelf as db:
             if key in db:
@@ -82,12 +84,12 @@ class CachedFunction:
     def cache_contains(self, *args, **kwargs):
         key = self.key_function(args, kwargs, parallel=self.parallel)
         assert not isinstance(key, parallel_output), "not supported"
-        key = stringify(key)
+        key = stringify(key, version=self.stringify_version)
         with self.shelf as db:
             return key in db
 
     def call_parallel(self, keys, args, kwargs):
-        keys = [stringify(key) for key in keys]
+        keys = [stringify(key, version=self.stringify_version) for key in keys]
         with self.shelf as db:
             keys_to_run = {k for k in set(keys) if k not in db}
         indices = []
@@ -131,7 +133,7 @@ class FileCachedFunction(CachedFunction):
             key, parallel_output
         ), "should be impossible due to prior validation"
 
-        key = stringify(key)
+        key = stringify(key, version=self.stringify_version)
 
         with self.shelf as db:
             if key in db:
