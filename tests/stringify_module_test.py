@@ -1,11 +1,10 @@
 import sys
 import unittest
 
-import torch
-from torch import nn
 import numpy as np
-
+import torch
 from parameterized import parameterized_class
+from torch import nn
 
 from permacache import stable_hash
 
@@ -39,6 +38,7 @@ class Container(nn.Module):
     def forward(self, x):
         return self.u(x) * 2
 
+
 # we just do this for one version of numpy and for linux. cross-platform and cross-numpy-version
 # tests are in stringify_test.py
 
@@ -53,6 +53,7 @@ def construct_with_seed(constructor, seed):
 @parameterized_class([{"seed": s} for s in seeds])
 class StringifyModuleTest(unittest.TestCase):
     seed: int
+
     def test_module_legacy_hash_regression_test(self):
         a2 = construct_with_seed(lambda: A(2), self.seed)
         a3 = construct_with_seed(lambda: A(3), self.seed)
